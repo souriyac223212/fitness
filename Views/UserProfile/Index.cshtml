@@ -1,0 +1,629 @@
+﻿@model FitWiseBD.Models.UserProfile?
+
+@{
+    ViewData["Title"] = "My Profile";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>FitWise BD - Profile</title>
+
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f5f8;
+            color: #21003d;
+        }
+
+
+        /* NAVBAR */
+
+        .navbar {
+            height: 70px;
+            background: #21003d;
+            color: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 45px;
+        }
+
+
+        .logo {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+
+        .logout {
+            background: #efa08e;
+            color: #21003d !important;
+
+            padding: 10px 20px;
+
+            border-radius: 20px;
+
+            font-weight: bold;
+        }
+
+
+        /* CONTAINER */
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+
+            padding: 40px 25px;
+        }
+
+
+        .title {
+            margin-bottom: 25px;
+        }
+
+
+        .title h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+
+        .title p {
+            color: #777;
+        }
+
+
+        /* PROFILE CARD */
+
+        .profile-card {
+            background: white;
+
+            padding: 30px;
+
+            border-radius: 22px;
+
+            box-shadow:
+                0 5px 20px
+                rgba(0,0,0,0.06);
+        }
+
+
+        .user-info {
+            background: #21003d;
+            color: white;
+
+            padding: 22px;
+
+            border-radius: 18px;
+
+            margin-bottom: 25px;
+        }
+
+
+        .user-info h2 {
+            margin-bottom: 8px;
+        }
+
+
+        .user-info p {
+            color: #ddd;
+        }
+
+
+        /* FORM */
+
+        .form-grid {
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap: 20px;
+        }
+
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+
+        .form-group label {
+            font-weight: bold;
+
+            margin-bottom: 8px;
+        }
+
+
+        .form-group input,
+        .form-group select {
+
+            padding: 13px 15px;
+
+            border: 1px solid #ddd;
+
+            border-radius: 12px;
+
+            font-size: 15px;
+
+            outline: none;
+        }
+
+
+        .form-group input:focus,
+        .form-group select:focus {
+
+            border-color: #21003d;
+        }
+
+
+        /* BUTTONS */
+
+        .buttons {
+            margin-top: 25px;
+
+            display: flex;
+
+            gap: 15px;
+        }
+
+
+        .btn {
+
+            border: none;
+
+            padding: 13px 25px;
+
+            border-radius: 25px;
+
+            cursor: pointer;
+
+            font-weight: bold;
+
+            font-size: 15px;
+        }
+
+
+        .save-btn {
+
+            background: #21003d;
+
+            color: white;
+        }
+
+
+        .delete-btn {
+
+            background: #efa08e;
+
+            color: #21003d;
+        }
+
+
+        .success {
+
+            background: #d9ffd9;
+
+            color: #087a08;
+
+            padding: 14px;
+
+            border-radius: 12px;
+
+            margin-bottom: 20px;
+
+            text-align: center;
+        }
+
+
+        /* MOBILE */
+
+        @@media (max-width: 700px) {
+
+            .navbar {
+                padding: 0 20px;
+            }
+
+            .nav-links {
+                gap: 10px;
+            }
+
+            .nav-links a {
+                display: none;
+            }
+
+            .nav-links .logout {
+                display: block;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- NAVBAR -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            FitWise BD
+        </div>
+
+
+        <div class="nav-links">
+
+            <a href="/Home">
+                Dashboard
+            </a>
+
+            <a href="/Foods">
+                Nutrition
+            </a>
+
+            <a href="#">
+                Workout
+            </a>
+
+            <a href="#">
+                BMI
+            </a>
+
+            <a href="/UserProfile">
+                Profile
+            </a>
+
+            <a href="#"
+               id="logoutButton"
+               class="logout">
+
+                Logout
+
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- MAIN -->
+
+    <main class="container">
+
+
+        <div class="title">
+
+            <h1>
+                My Profile
+            </h1>
+
+            <p>
+                Manage your personal fitness information.
+            </p>
+
+        </div>
+
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="success">
+
+                @TempData["Success"]
+
+            </div>
+        }
+
+
+        <div class="profile-card">
+
+
+            <!-- USER INFO -->
+
+            <div class="user-info">
+
+                <h2>
+                    @ViewBag.FullName
+                </h2>
+
+                <p>
+                    @ViewBag.Email
+                </p>
+
+            </div>
+
+
+            <!-- PROFILE FORM -->
+
+            <form asp-controller="UserProfile"
+                  asp-action="Save"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+
+                <div class="form-grid">
+
+
+                    <!-- AGE -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Age
+                        </label>
+
+                        <input type="number"
+                               name="Age"
+                               min="10"
+                               max="100"
+                               value="@Model?.Age"
+                               placeholder="Enter age" />
+
+                    </div>
+
+
+                    <!-- HEIGHT -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Height (cm)
+                        </label>
+
+                        <input type="number"
+                               name="Height"
+                               min="50"
+                               max="250"
+                               step="0.1"
+                               value="@Model?.Height"
+                               placeholder="Enter height" />
+
+                    </div>
+
+
+                    <!-- WEIGHT -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Weight (kg)
+                        </label>
+
+                        <input type="number"
+                               name="Weight"
+                               min="20"
+                               max="300"
+                               step="0.1"
+                               value="@Model?.Weight"
+                               placeholder="Enter weight" />
+
+                    </div>
+
+
+                    <!-- GENDER -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Gender
+                        </label>
+
+                        <select name="Gender">
+
+                            <option value="">
+                                Select Gender
+                            </option>
+
+                            <option value="Male"
+                                    selected="@(Model?.Gender == "Male")">
+                                Male
+                            </option>
+
+                            <option value="Female"
+                                    selected="@(Model?.Gender == "Female")">
+                                Female
+                            </option>
+
+                            <option value="Other"
+                                    selected="@(Model?.Gender == "Other")">
+                                Other
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- FITNESS GOAL -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Fitness Goal
+                        </label>
+
+                        <select name="FitnessGoal">
+
+                            <option value="">
+                                Select Goal
+                            </option>
+
+                            <option value="Weight Loss"
+                                    selected="@(Model?.FitnessGoal == "Weight Loss")">
+                                Weight Loss
+                            </option>
+
+                            <option value="Muscle Gain"
+                                    selected="@(Model?.FitnessGoal == "Muscle Gain")">
+                                Muscle Gain
+                            </option>
+
+                            <option value="Maintain Weight"
+                                    selected="@(Model?.FitnessGoal == "Maintain Weight")">
+                                Maintain Weight
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- ACTIVITY -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Activity Level
+                        </label>
+
+                        <select name="ActivityLevel">
+
+                            <option value="">
+                                Select Activity
+                            </option>
+
+                            <option value="Low"
+                                    selected="@(Model?.ActivityLevel == "Low")">
+                                Low
+                            </option>
+
+                            <option value="Moderate"
+                                    selected="@(Model?.ActivityLevel == "Moderate")">
+                                Moderate
+                            </option>
+
+                            <option value="High"
+                                    selected="@(Model?.ActivityLevel == "High")">
+                                High
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="buttons">
+
+                    <button type="submit"
+                            class="btn save-btn">
+
+                        Save Profile
+
+                    </button>
+
+                </div>
+
+
+            </form>
+
+
+            <!-- DELETE -->
+
+            @if (Model != null)
+            {
+
+                <form asp-controller="UserProfile"
+                      asp-action="Delete"
+                      method="post"
+                      onsubmit="return confirm('Are you sure you want to delete your profile?');">
+
+                    @Html.AntiForgeryToken()
+
+                    <div class="buttons">
+
+                        <button type="submit"
+                                class="btn delete-btn">
+
+                            Delete Profile
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            }
+
+
+        </div>
+
+    </main>
+
+
+    <!-- LOGOUT -->
+
+    <script>
+
+        document
+            .getElementById("logoutButton")
+            .addEventListener("click", async function (e) {
+
+                e.preventDefault();
+
+
+                // Remove JWT
+                localStorage.removeItem("token");
+
+
+                // Remove saved user
+                localStorage.removeItem("user");
+
+
+                // Go to login
+                window.location.href =
+                    "/Auth/Login";
+
+            });
+
+    </script>
+
+
+</body>
+
+</html>
