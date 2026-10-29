@@ -1,50 +1,400 @@
-﻿<!DOCTYPE html>
+﻿
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
+@using FitWiseBD.Data
+@using FitWiseBD.Models
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext DbContext
+
+@{
+    var unreadNotificationCount = 0;
+    string? navbarProfilePhoto = null;
+
+    if (SignInManager.IsSignedIn(User))
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!string.IsNullOrEmpty(userId))
+        {
+            unreadNotificationCount = await DbContext.Notifications
+                .CountAsync(n => n.UserId == userId && !n.IsRead);
+
+            navbarProfilePhoto = await DbContext.UserProfiles
+                .AsNoTracking()
+                .Where(p => p.UserId == userId)
+                .Select(p => p.ProfilePhotoPath)
+                .FirstOrDefaultAsync();
+        }
+    }
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - FITNESS</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/fitness.styles.css" asp-append-version="true" />
+
+    <title>@ViewData["Title"] - FitWise BD</title>
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <style>
+        html {
+            font-size: 14px;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f7f5f8;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #21003d;
+        }
+
+        /* NAVBAR */
+        .fw-navbar {
+            width: 100%;
+            min-height: 52px;
+            background: #21003d;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 18px;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1000;
+            box-shadow: 0 3px 12px rgba(33, 0, 61, 0.15);
+        }
+
+        .fw-brand {
+            color: white;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 700;
+            transition: .25s ease;
+        }
+
+        .fw-brand:hover {
+            color: #f49a8a;
+            transform: translateY(-1px);
+        }
+
+        .fw-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .fw-nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 7px 0;
+            position: relative;
+            transition: .25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .fw-nav-links a::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 1px;
+            width: 0;
+            height: 2px;
+            background: #f49a8a;
+            border-radius: 5px;
+            transition: width .25s ease;
+        }
+
+        .fw-nav-links a:hover {
+            color: #f49a8a;
+        }
+
+        .fw-nav-links a:hover::after,
+        .fw-nav-links a.active::after {
+            width: 100%;
+        }
+
+        .fw-nav-links a.active {
+            color: #f49a8a;
+        }
+
+        /* PROFILE PHOTO */
+        .fw-profile-photo,
+        .fw-profile-placeholder {
+            width: 29px;
+            height: 29px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 2px solid #f49a8a;
+        }
+
+        .fw-profile-placeholder {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #eee3ff;
+            color: #21003d;
+            font-size: 16px;
+        }
+
+        .fw-profile-link {
+            gap: 6px !important;
+        }
+
+        /* LOGOUT */
+        .fw-logout-form {
+            display: inline;
+            margin: 0;
+            padding: 0;
+        }
+
+        .fw-logout-btn {
+            border: none;
+            background: #f49a8a;
+            color: #21003d;
+            border-radius: 20px;
+            padding: 7px 15px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .25s ease;
+        }
+
+        .fw-logout-btn:hover {
+            background: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,.15);
+        }
+
+        /* MAIN CONTENT */
+        .fw-main {
+            width: 100%;
+            max-width: none;
+            min-height: calc(100vh - 52px);
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* NOTIFICATION BELL */
+        .fw-nav-links a.fw-notification-link {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 7px 3px;
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .fw-nav-links a.fw-notification-link::after {
+            display: none;
+        }
+
+        .fw-notification-bell {
+            display: inline-block;
+            transition: transform .2s ease;
+        }
+
+        .fw-nav-links a.fw-notification-link:hover .fw-notification-bell {
+            transform: scale(1.12);
+        }
+
+        .fw-notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -9px;
+            min-width: 17px;
+            height: 17px;
+            padding: 0 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f49a8a;
+            color: #21003d;
+            border: 1px solid #21003d;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        /* MOBILE */
+        @@media (max-width: 800px) {
+            .fw-navbar {
+                height: auto;
+                min-height: 52px;
+                flex-wrap: wrap;
+                padding: 10px 15px;
+                gap: 8px;
+            }
+
+            .fw-nav-links {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+
+            .fw-nav-links a {
+                font-size: 11px;
+            }
+        }
+
+        @@media (max-width: 500px) {
+            .fw-brand {
+                font-size: 18px;
+            }
+
+            .fw-nav-links {
+                gap: 9px;
+            }
+
+            .fw-nav-links a {
+                font-size: 10px;
+            }
+
+            .fw-logout-btn {
+                font-size: 10px;
+                padding: 6px 11px;
+            }
+
+            .fw-profile-photo,
+            .fw-profile-placeholder {
+                width: 25px;
+                height: 25px;
+            }
+        }
+    </style>
+
+    @await RenderSectionAsync("Styles", required: false)
 </head>
+
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">fitness</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+    <header class="fw-navbar">
+
+        <a class="fw-brand"
+           asp-controller="Home"
+           asp-action="Index">
+            FitWise BD
+        </a>
+
+        <nav class="fw-nav-links">
+
+            <a asp-controller="Home"
+               asp-action="Index"
+               class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
+                Dashboard
+            </a>
+
+            <a asp-controller="Nutrition"
+               asp-action="Index"
+               class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Nutrition" ? "active" : "")">
+                Nutrition
+            </a>
+
+            <a asp-controller="Workout"
+               asp-action="Index"
+               class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Workout" ? "active" : "")">
+                Workout
+            </a>
+
+            <a asp-controller="Progress"
+               asp-action="Index"
+               class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Progress" ? "active" : "")">
+                Progress
+            </a>
+
+            <a asp-controller="BMI"
+               asp-action="Index"
+               class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "BMI" ? "active" : "")">
+                BMI
+            </a>
+
+            <a asp-controller="FitnessAi"
+               asp-action="Index"
+               class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "FitnessAi" ? "active" : "")">
+                ✨ AI Assistant
+            </a>
+
+            <!-- PROFILE WITH PHOTO -->
+            <a asp-controller="UserProfile"
+               asp-action="Index"
+               class="fw-profile-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "UserProfile" ? "active" : "")">
+
+                @if (!string.IsNullOrWhiteSpace(navbarProfilePhoto))
+                {
+                    <img src="@navbarProfilePhoto"
+                         alt="Profile photo"
+                         class="fw-profile-photo" />
+                }
+                else
+                {
+                    <span class="fw-profile-placeholder">👤</span>
+                }
+
+                <span>Profile</span>
+            </a>
+
+            <!-- NOTIFICATIONS -->
+            <a asp-controller="Notification"
+               asp-action="Index"
+               class="fw-notification-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Notification" ? "active" : "")"
+               title="Notifications"
+               aria-label="Notifications">
+
+                <span class="fw-notification-bell">🔔</span>
+
+                @if (unreadNotificationCount > 0)
+                {
+                    <span class="fw-notification-badge">
+                        @(unreadNotificationCount > 99
+                            ? "99+"
+                            : unreadNotificationCount.ToString())
+                    </span>
+                }
+            </a>
+
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <form asp-controller="Auth"
+                      asp-action="Logout"
+                      method="post"
+                      class="fw-logout-form">
+
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit" class="fw-logout-btn">
+                        Logout
+                    </button>
+                </form>
+            }
+
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - fitness - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
+    <main class="fw-main">
+        @RenderBody()
+    </main>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

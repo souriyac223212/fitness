@@ -1,65 +1,224 @@
 @model IEnumerable<FitWiseBD.Models.Food>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Food Management";
 }
 
-<h1>Index</h1>
+<link rel="stylesheet"
+      href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css" />
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Calories)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Protein)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Carbs)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Fat)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Cost)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(model => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.Calories)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.Protein)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.Carbs)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.Fat)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.Cost)
-            </td>
-            <td>
-                    <a asp-action="Edit" asp-route-id="@item.FoodId" class="btn btn-primary btn-sm">Edit</a>
-                    <a asp-action="Details" asp-route-id="@item.FoodId" class="btn btn-info btn-sm">Details</a>
-                    <a asp-action="Delete" asp-route-id="@item.FoodId" class="btn btn-danger btn-sm">Delete</a>
-            </td>
-        </tr>
+<style>
+    .foods-page {
+        padding: 25px 0;
+    }
+
+    .foods-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+        .foods-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .foods-header p {
+            color: #6c757d;
+            margin-bottom: 0;
+        }
+
+    .foods-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 3px 15px rgba(0, 0, 0, 0.06);
+        overflow-x: auto;
+    }
+
+    #foodsTable {
+        width: 100% !important;
+    }
+
+        #foodsTable thead th {
+            white-space: nowrap;
+            background-color: #f8f9fa;
+        }
+
+        #foodsTable tbody td {
+            vertical-align: middle;
+        }
+
+    .food-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        min-width: 190px;
+    }
+
+    .foods-card .dt-container {
+        padding-top: 5px;
+    }
+
+    @@media (max-width: 576px) {
+        .foods-card {
+            padding: 12px;
+        }
+
+        .foods-header h1 {
+            font-size: 23px;
+        }
+    }
+</style>
+
+<div class="container foods-page">
+
+    <div class="foods-header">
+        <div>
+            <h1>Food Management</h1>
+            <p>Manage your food records, nutrition and cost.</p>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary">
+            + Add New Food
+        </a>
+    </div>
+
+    <div class="foods-card">
+
+        <table id="foodsTable"
+               class="table table-striped table-hover table-bordered align-middle">
+
+            <thead>
+                <tr>
+                    <th>Food Name</th>
+                    <th>Meal Type</th>
+                    <th>Calories</th>
+                    <th>Protein (g)</th>
+                    <th>Carbs (g)</th>
+                    <th>Fat (g)</th>
+                    <th>Cost</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Name</td>
+
+                        <td>@item.MealType</td>
+
+                        <td>@item.Calories</td>
+
+                        <td>@item.Protein</td>
+
+                        <td>@item.Carbs</td>
+
+                        <td>@item.Fat</td>
+
+                        <td>@item.Cost</td>
+
+                        <td>
+                            <div class="food-actions">
+
+                                <a asp-action="Edit"
+                                   asp-route-id="@item.FoodId"
+                                   class="btn btn-primary btn-sm">
+                                    Edit
+                                </a>
+
+                                <a asp-action="Details"
+                                   asp-route-id="@item.FoodId"
+                                   class="btn btn-info btn-sm">
+                                    Details
+                                </a>
+
+                                <a asp-action="Delete"
+                                   asp-route-id="@item.FoodId"
+                                   class="btn btn-danger btn-sm">
+                                    Delete
+                                </a>
+
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+
+    <script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            $('#foodsTable').DataTable({
+
+                // Pagination
+                paging: true,
+
+                // Default records per page
+                pageLength: 10,
+
+                // Allow users to choose page size
+                lengthMenu: [5, 10, 25, 50, 100],
+
+                // Search box
+                searching: true,
+
+                // Sorting
+                ordering: true,
+
+                // Show record information
+                info: true,
+
+                // Default sorting by Food Name
+                order: [[0, 'asc']],
+
+                // Hide pagination when only one page exists
+                pagingType: 'full_numbers',
+
+                // Text displayed in the table
+                language: {
+                    search: 'Search foods:',
+                    lengthMenu: 'Show _MENU_ foods per page',
+                    info: 'Showing _START_ to _END_ of _TOTAL_ foods',
+                    infoEmpty: 'No food records available',
+                    zeroRecords: 'No matching food records found',
+                    emptyTable: 'No food records available',
+                    paginate: {
+                        first: 'First',
+                        last: 'Last',
+                        next: 'Next',
+                        previous: 'Previous'
+                    }
+                },
+
+                // Keep the Actions column unsorted
+                columnDefs: [
+                    {
+                        targets: 7,
+                        orderable: false,
+                        searchable: false
+                    }
+                ]
+
+            });
+
+        });
+    </script>
 }
-    </tbody>
-</table>

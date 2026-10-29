@@ -1,684 +1,2450 @@
-﻿@model FitWiseBD.Models.UserProfile?
+﻿@model FitWiseBD.Models.UserProfile
+
+@using FitWiseBD.Models
+@using System.Collections.Generic
+@using System.Linq
+@using System.Globalization
 
 @{
     ViewData["Title"] = "Dashboard";
-    Layout = null;
+
+    // =========================================================
+    // USER INFORMATION
+    // =========================================================
+
+    string fullName = ViewBag.FullName ?? "User";
+    string email = ViewBag.Email ?? "";
+
+
+    // =========================================================
+    // BMI
+    // =========================================================
 
     double bmi = 0;
-    double calories = 0;
 
     if (ViewBag.BMI != null)
     {
-        double.TryParse(ViewBag.BMI.ToString(), out bmi);
+        bmi = Convert.ToDouble(ViewBag.BMI);
     }
+
+    string bmiStatus = ViewBag.BMIStatus ?? "Profile incomplete";
+
+
+    // =========================================================
+    // DAILY CALORIES
+    // =========================================================
+
+    double calories = 0;
 
     if (ViewBag.Calories != null)
     {
-        double.TryParse(ViewBag.Calories.ToString(), out calories);
+        calories = Convert.ToDouble(ViewBag.Calories);
     }
 
-    string bmiStatus = ViewBag.BMIStatus?.ToString() ?? "";
 
-    string fullName = ViewBag.FullName?.ToString() ?? "User";
+    // =========================================================
+    // WORKOUT MINUTES
+    // =========================================================
 
-    int workoutMinutes = 45;
+    int workoutMinutes = Model?.Weight.HasValue == true ? 30 : 0;
 
     if (ViewBag.WorkoutMinutes != null)
     {
-        int.TryParse(
-            ViewBag.WorkoutMinutes.ToString(),
-            out workoutMinutes
-        );
+        workoutMinutes = Convert.ToInt32(ViewBag.WorkoutMinutes);
+    }
+
+
+    // =========================================================
+    // PROFILE STATUS
+    // =========================================================
+
+    bool hasProfile = false;
+
+    if (ViewBag.HasProfile != null)
+    {
+        hasProfile = Convert.ToBoolean(ViewBag.HasProfile);
+    }
+
+    if (Model != null &&
+        Model.Age.HasValue &&
+        Model.Height.HasValue &&
+        Model.Weight.HasValue &&
+        !string.IsNullOrWhiteSpace(Model.FitnessGoal))
+    {
+        hasProfile = true;
+    }
+
+
+    // =========================================================
+    // FITNESS GOAL
+    // =========================================================
+
+    string fitnessGoal = Model?.FitnessGoal ?? "";
+
+
+    // =========================================================
+    // WORKOUTS
+    // =========================================================
+
+    IEnumerable<Workout> recommendedWorkouts =
+        Enumerable.Empty<Workout>();
+
+    if (ViewBag.RecommendedWorkouts != null)
+    {
+        recommendedWorkouts =
+            ViewBag.RecommendedWorkouts as IEnumerable<Workout>
+            ?? Enumerable.Empty<Workout>();
+    }
+
+
+    // =========================================================
+    // NUTRITION DATA
+    // =========================================================
+
+    IEnumerable<Food> breakfastFoods =
+        Enumerable.Empty<Food>();
+
+    IEnumerable<Food> lunchFoods =
+        Enumerable.Empty<Food>();
+
+    IEnumerable<Food> dinnerFoods =
+        Enumerable.Empty<Food>();
+
+    IEnumerable<Food> snacksFoods =
+        Enumerable.Empty<Food>();
+
+
+    if (ViewBag.BreakfastFoods != null)
+    {
+        breakfastFoods =
+            ViewBag.BreakfastFoods as IEnumerable<Food>
+            ?? Enumerable.Empty<Food>();
+    }
+
+
+    if (ViewBag.LunchFoods != null)
+    {
+        lunchFoods =
+            ViewBag.LunchFoods as IEnumerable<Food>
+            ?? Enumerable.Empty<Food>();
+    }
+
+
+    if (ViewBag.DinnerFoods != null)
+    {
+        dinnerFoods =
+            ViewBag.DinnerFoods as IEnumerable<Food>
+            ?? Enumerable.Empty<Food>();
+    }
+
+
+    if (ViewBag.SnacksFoods != null)
+    {
+        snacksFoods =
+            ViewBag.SnacksFoods as IEnumerable<Food>
+            ?? Enumerable.Empty<Food>();
+    }
+
+
+    // =========================================================
+    // MEAL CALORIE CALCULATION
+    // =========================================================
+
+    double breakfastCalories =
+        breakfastFoods.Sum(x => Convert.ToDouble(x.Calories));
+
+    double lunchCalories =
+        lunchFoods.Sum(x => Convert.ToDouble(x.Calories));
+
+    double dinnerCalories =
+        dinnerFoods.Sum(x => Convert.ToDouble(x.Calories));
+
+    double snacksCalories =
+        snacksFoods.Sum(x => Convert.ToDouble(x.Calories));
+
+
+    // =========================================================
+    // TOTAL NUTRITION CALORIES
+    // =========================================================
+
+    double totalNutritionCalories =
+        breakfastCalories +
+        lunchCalories +
+        dinnerCalories +
+        snacksCalories;
+
+
+    // =========================================================
+    // REMAINING CALORIES
+    // =========================================================
+
+    double remainingCalories =
+        Math.Max(0, calories - totalNutritionCalories);
+
+
+    // =========================================================
+    // NEXT MEAL
+    // =========================================================
+
+    string nextMeal = "";
+
+    if (breakfastCalories == 0)
+    {
+        nextMeal = "Breakfast";
+    }
+    else if (lunchCalories == 0)
+    {
+        nextMeal = "Lunch";
+    }
+    else if (dinnerCalories == 0)
+    {
+        nextMeal = "Dinner";
+    }
+    else if (snacksCalories == 0)
+    {
+        nextMeal = "Snacks";
+    }
+    else
+    {
+        nextMeal = "All meals logged";
     }
 }
 
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
+<style>
 
-    <meta charset="utf-8" />
+  /* =========================================================
+   MAIN PAGE - FULL SCREEN WIDTH
+========================================================= */
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0" />
+.dashboard-container {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 24px 30px;
+    color: #21003d;
+    box-sizing: border-box;
+    animation: pageFadeIn .7s ease both;
+}
 
-    <title>FitWise BD - Dashboard</title>
+    /* =========================================================
+           ANIMATIONS
+        ========================================================= */
 
-    <style>
+    @@keyframes pageFadeIn {
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        from {
+            opacity: 0;
+            transform: translateY(12px);
         }
 
-        body {
-            font-family: Arial, sans-serif;
-            background: #f7f5f8;
-            color: #21003d;
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+
+    @@keyframes slideDown {
+
+        from {
+            opacity: 0;
+            transform: translateY(-18px);
         }
 
-        /* =========================
-           NAVBAR
-        ========================= */
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 
-        .navbar {
-            height: 70px;
-            background: #21003d;
-            color: white;
 
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+    @@keyframes slideUp {
 
-            padding: 0 45px;
+        from {
+            opacity: 0;
+            transform: translateY(18px);
         }
 
-        .logo {
-            font-size: 25px;
-            font-weight: bold;
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+
+    @@keyframes scaleIn {
+
+        from {
+            opacity: 0;
+            transform: scale(.94);
         }
 
-        .nav-links {
-            display: flex;
-            gap: 30px;
-            align-items: center;
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+
+    @@keyframes floatCircle {
+
+        0%, 100% {
+            transform: translateY(0) scale(1);
         }
 
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            font-size: 15px;
+        50% {
+            transform: translateY(8px) scale(1.05);
+        }
+    }
+
+
+    @@keyframes shimmer {
+
+        0% {
+            transform: translateX(-120%);
         }
 
-        .nav-links a:hover {
-            opacity: 0.8;
+        100% {
+            transform: translateX(120%);
+        }
+    }
+
+
+    @@keyframes softPulse {
+
+        0%, 100% {
+            opacity: .5;
+            transform: scale(1);
         }
 
-        /* =========================
-           LOGOUT BUTTON
-        ========================= */
-
-        .logout {
-            background: #efa08e;
-            color: #21003d;
-
-            padding: 10px 20px;
-
-            border: none;
-            border-radius: 20px;
-
-            font-weight: bold;
-            font-size: 15px;
-
-            cursor: pointer;
+        50% {
+            opacity: 1;
+            transform: scale(1.25);
         }
+    }
 
-        .logout:hover {
-            background: #f5b09f;
-        }
 
-        /* =========================
-           MAIN
-        ========================= */
+    /* =========================================================
+           WELCOME BANNER
+        ========================================================= */
 
-        .container {
-            max-width: 1200px;
+    .welcome-banner {
+        position: relative;
+        overflow: hidden;
+        background: #21003d;
+        color: white;
+        padding: 30px;
+        border-radius: 20px;
+        margin-bottom: 22px;
+        animation: slideDown .7s ease both;
+        box-shadow: 0 8px 25px rgba(33, 0, 61, .10);
+    }
 
-            margin: auto;
 
-            padding: 40px 25px;
-        }
-
-        /* =========================
-           WELCOME
-        ========================= */
-
-        .welcome {
-            background: #21003d;
-
-            color: white;
-
-            padding: 35px;
-
-            border-radius: 25px;
-
-            position: relative;
-
-            overflow: hidden;
-        }
-
-        .welcome h1 {
-            font-size: 34px;
-            margin-bottom: 10px;
-        }
-
-        .welcome p {
-            color: #ddd;
-            font-size: 17px;
-        }
-
-        .circle {
+        .welcome-banner::after {
+            content: "";
             position: absolute;
-
-            width: 180px;
-            height: 180px;
-
-            background: #efa08e;
-
-            border-radius: 50%;
-
-            right: -50px;
-            top: -80px;
+            left: -100%;
+            top: 0;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient( 90deg, transparent, rgba(255,255,255,.06), transparent );
+            animation: shimmer 5s infinite;
         }
 
-        /* =========================
-           PROFILE WARNING
-        ========================= */
 
-        .profile-warning {
-            background: #fff3cd;
-
-            color: #856404;
-
-            padding: 15px 20px;
-
-            border-radius: 12px;
-
-            margin-top: 20px;
-
-            text-align: center;
+        .welcome-banner h1 {
+            position: relative;
+            z-index: 2;
+            margin: 0 0 8px 0;
+            font-size: 25px;
+            font-weight: 700;
         }
 
-        .profile-warning a {
-            color: #21003d;
-            font-weight: bold;
+
+        .welcome-banner p {
+            position: relative;
+            z-index: 2;
+            margin: 0;
+            font-size: 13px;
+            color: #eee;
         }
 
-        /* =========================
-           CARDS
-        ========================= */
 
-        .cards {
-            display: grid;
+    .welcome-circle {
+        position: absolute;
+        width: 105px;
+        height: 105px;
+        right: -20px;
+        top: -25px;
+        background: #f19b88;
+        border-radius: 50%;
+        animation: floatCircle 4s ease-in-out infinite;
+    }
 
-            grid-template-columns:
-                repeat(3, 1fr);
 
-            gap: 20px;
+    /* =========================================================
+           STATISTICS
+        ========================================================= */
 
-            margin-top: 30px;
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-bottom: 18px;
+    }
+
+
+    .stat-card {
+        position: relative;
+        overflow: hidden;
+        background: white;
+        border-radius: 15px;
+        padding: 18px;
+        box-shadow: 0 5px 18px rgba(0,0,0,.06);
+        opacity: 0;
+        animation: scaleIn .55s ease forwards;
+        transition: transform .25s ease, box-shadow .25s ease;
+    }
+
+
+        .stat-card:nth-child(1) {
+            animation-delay: .15s;
         }
 
-        .card {
-            background: white;
 
-            padding: 25px;
-
-            border-radius: 20px;
-
-            box-shadow:
-                0 5px 20px
-                rgba(0,0,0,0.06);
+        .stat-card:nth-child(2) {
+            animation-delay: .25s;
         }
 
-        .card h3 {
-            font-size: 17px;
 
-            margin-bottom: 15px;
+        .stat-card:nth-child(3) {
+            animation-delay: .35s;
         }
 
-        .value {
-            font-size: 32px;
 
-            font-weight: bold;
-
-            color: #21003d;
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 28px rgba(33,0,61,.10);
         }
 
-        .unit {
-            color: #777;
 
-            font-size: 14px;
+    .stat-title {
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+
+    .stat-value {
+        font-size: 22px;
+        font-weight: 700;
+        color: #21003d;
+        margin-bottom: 3px;
+    }
+
+
+    .stat-subtitle {
+        font-size: 10px;
+        color: #777;
+    }
+
+
+    /* =========================================================
+           MAIN TWO COLUMN SECTION
+        ========================================================= */
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        margin-bottom: 28px;
+    }
+
+
+    .dashboard-card {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 5px 18px rgba(0,0,0,.05);
+        opacity: 0;
+        animation: slideUp .65s ease forwards;
+        transition: box-shadow .25s ease;
+    }
+
+
+        .dashboard-card:nth-child(1) {
+            animation-delay: .45s;
         }
 
-        /* =========================
-           SECTIONS
-        ========================= */
 
-        .sections {
-            display: grid;
-
-            grid-template-columns:
-                1fr 1fr;
-
-            gap: 25px;
-
-            margin-top: 30px;
+        .dashboard-card:nth-child(2) {
+            animation-delay: .55s;
         }
 
-        .section {
-            background: white;
 
-            padding: 25px;
-
-            border-radius: 20px;
+        .dashboard-card:hover {
+            box-shadow: 0 10px 26px rgba(33,0,61,.08);
         }
 
-        .section h2 {
-            margin-bottom: 20px;
+
+    .card-title {
+        font-size: 17px;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+
+    /* =========================================================
+           WORKOUT
+        ========================================================= */
+
+    .workout-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 11px 0;
+        border-bottom: 1px solid #eee;
+        font-size: 12px;
+        opacity: 0;
+        animation: slideUp .45s ease forwards;
+    }
+
+
+        .workout-row:nth-child(2) {
+            animation-delay: .55s;
         }
 
-        .item {
-            display: flex;
 
-            justify-content: space-between;
-
-            padding: 15px 0;
-
-            border-bottom:
-                1px solid #eee;
+        .workout-row:nth-child(3) {
+            animation-delay: .65s;
         }
 
-        .item:last-child {
+
+        .workout-row:nth-child(4) {
+            animation-delay: .75s;
+        }
+
+
+        .workout-row:last-of-type {
             border-bottom: none;
         }
 
-        .btn {
-            display: inline-block;
 
-            margin-top: 20px;
+        .workout-row strong {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 3px;
+        }
 
-            background: #21003d;
 
+        .workout-row small {
+            color: #777;
+            font-size: 10px;
+        }
+
+
+    .workout-stats {
+        color: #21003d;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+
+    /* =========================================================
+           BUTTON
+        ========================================================= */
+
+    .view-btn {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+        margin-top: 13px;
+        background: #21003d;
+        color: white;
+        text-decoration: none;
+        padding: 9px 17px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+
+
+        .view-btn::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 70%;
+            height: 100%;
+            background: linear-gradient( 90deg, transparent, rgba(255,255,255,.18), transparent );
+            transition: left .45s ease;
+        }
+
+
+        .view-btn:hover::after {
+            left: 130%;
+        }
+
+
+        .view-btn:hover {
+            background: #35005f;
             color: white;
-
-            text-decoration: none;
-
-            padding: 12px 25px;
-
-            border-radius: 25px;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-        }
-
-        /* =========================
-           MOBILE
-        ========================= */
-
-        @@media (max-width: 800px) {
-
-            .navbar {
-                padding: 0 20px;
-            }
-
-            .nav-links {
-                gap: 10px;
-            }
-
-            .nav-links a {
-                display: none;
-            }
-
-            .cards {
-                grid-template-columns: 1fr;
-            }
-
-            .sections {
-                grid-template-columns: 1fr;
-            }
-
-            .welcome h1 {
-                font-size: 28px;
-            }
-
-            .container {
-                padding: 25px 15px;
-            }
-        }
-
-    </style>
-
-</head>
-
-<body>
-
-    <!-- =========================
-         NAVBAR
-    ========================= -->
-
-    <nav class="navbar">
-
-        <div class="logo">
-            FitWise BD
-        </div>
-
-        <div class="nav-links">
-
-            <a href="/Home">
-                Dashboard
-            </a>
-
-            <a href="/Foods">
-                Nutrition
-            </a>
-
-            <a href="#">
-                Workout
-            </a>
-
-            <a href="#">
-                BMI
-            </a>
-
-            <a href="/UserProfile">
-                Profile
-            </a>
-
-            <!-- LOGOUT -->
-            <form asp-controller="Auth"
-                  asp-action="Logout"
-                  method="post"
-                  style="display:inline; margin:0;">
-
-                @Html.AntiForgeryToken()
-
-                <button type="submit"
-                        class="logout">
-
-                    Logout
-
-                </button>
-
-            </form>
-
-        </div>
-
-    </nav>
-
-
-    <!-- =========================
-         MAIN CONTENT
-    ========================= -->
-
-    <main class="container">
-
-
-        <!-- =========================
-             WELCOME
-        ========================= -->
-
-        <div class="welcome">
-
-            <div class="circle"></div>
-
-            <h1>
-                Welcome to FitWise BD 👋
-            </h1>
-
-            <p>
-
-                Hello,
-
-                <strong>
-                    @fullName
-                </strong>!
-
-                Your personal fitness
-                and nutrition dashboard.
-
-            </p>
-
-        </div>
-
-
-        <!-- =========================
-             PROFILE WARNING
-        ========================= -->
-
-        @if (Model == null ||
-             !Model.Age.HasValue ||
-             !Model.Height.HasValue ||
-             !Model.Weight.HasValue)
-        {
-            <div class="profile-warning">
-
-                Please complete your
-
-                <a href="/UserProfile">
-                    profile
-                </a>
-
-                to calculate BMI
-                and daily calories.
-
-            </div>
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(33,0,61,.18);
         }
 
 
-        <!-- =========================
-             SUMMARY CARDS
-        ========================= -->
-
-        <div class="cards">
+        .view-btn:active {
+            transform: scale(.96);
+        }
 
 
-            <!-- =========================
-                 BMI
-            ========================= -->
+    /* =========================================================
+           TODAY'S NUTRITION SUMMARY
+        ========================================================= */
 
-            <div class="card">
+    .nutrition-summary-card {
+        position: relative;
+        overflow: hidden;
+    }
 
-                <h3>
-                    ⚖️ BMI
-                </h3>
 
-                <div class="value">
+    .nutrition-summary-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
 
-                    @if (bmi > 0)
-                    {
-                        @bmi.ToString("0.0")
-                    }
-                    else
-                    {
-                        @:--
-                    }
 
-                </div>
+        .nutrition-summary-header .card-title {
+            margin-bottom: 0;
+        }
 
-                <span class="unit">
 
-                    @if (!string.IsNullOrWhiteSpace(bmiStatus))
-                    {
-                        @bmiStatus
-                    }
-                    else
-                    {
-                        @:Complete profile
-                    }
+    .nutrition-status-dot {
+        width: 8px;
+        height: 8px;
+        background: #f19b88;
+        border-radius: 50%;
+        box-shadow: 0 0 0 5px rgba(241,155,136,.12);
+        animation: softPulse 2.5s ease-in-out infinite;
+    }
 
-                </span>
+
+    /* =========================================================
+           MEAL SUMMARY
+        ========================================================= */
+
+    .nutrition-meal-summary {
+        margin-top: 3px;
+    }
+
+
+    .nutrition-summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 7px 0;
+        font-size: 11px;
+        color: #333;
+        transition: transform .2s ease, padding-left .2s ease;
+    }
+
+
+        .nutrition-summary-row:hover {
+            padding-left: 5px;
+            transform: translateX(2px);
+        }
+
+
+        .nutrition-summary-row span {
+            font-weight: 500;
+        }
+
+
+        .nutrition-summary-row strong {
+            color: #21003d;
+            font-size: 11px;
+        }
+
+
+    /* =========================================================
+           DIVIDER
+        ========================================================= */
+
+    .nutrition-divider {
+        height: 1px;
+        background: #ddd;
+        margin: 7px 0;
+    }
+
+
+    /* =========================================================
+           TOTAL
+        ========================================================= */
+
+    .nutrition-total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        font-size: 12px;
+        color: #21003d;
+    }
+
+
+        .nutrition-total-row span {
+            font-weight: 700;
+        }
+
+
+        .nutrition-total-row strong {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+
+    /* =========================================================
+           NEXT MEAL
+        ========================================================= */
+
+    .next-meal-box {
+        margin-top: 13px;
+        padding: 11px 12px;
+        border-radius: 10px;
+        background: #faf7fc;
+        border-left: 3px solid #21003d;
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+
+        .next-meal-box:hover {
+            transform: translateX(3px);
+            box-shadow: 0 4px 12px rgba(33,0,61,.06);
+        }
+
+
+    .next-meal-title {
+        color: #21003d;
+        font-size: 11px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+
+    .next-meal-box p {
+        margin: 0 0 5px;
+        font-size: 10px;
+        color: #555;
+    }
+
+
+        .next-meal-box p strong {
+            color: #21003d;
+        }
+
+
+    .remaining-calories {
+        font-size: 10px;
+        color: #777;
+    }
+
+
+        .remaining-calories strong {
+            color: #21003d;
+        }
+
+
+    /* =========================================================
+           NUTRITION DETAILS BUTTON
+        ========================================================= */
+
+    .nutrition-details-btn {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+        margin-top: 13px;
+        padding: 9px 15px;
+        border-radius: 20px;
+        background: #21003d;
+        color: white;
+        text-decoration: none;
+        font-size: 10px;
+        font-weight: 600;
+        transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+
+
+        .nutrition-details-btn::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -120%;
+            width: 70%;
+            height: 100%;
+            background: linear-gradient( 90deg, transparent, rgba(255,255,255,.18), transparent );
+            transition: left .45s ease;
+        }
+
+
+        .nutrition-details-btn:hover::after {
+            left: 130%;
+        }
+
+
+        .nutrition-details-btn:hover {
+            background: #35005f;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(33,0,61,.18);
+        }
+
+
+        .nutrition-details-btn:active {
+            transform: scale(.96);
+        }
+
+
+    /* =========================================================
+           RECOMMENDED FOR YOU
+        ========================================================= */
+
+    .recommendation-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        animation: slideUp .6s ease .7s both;
+    }
+
+
+        .recommendation-header h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+
+        .recommendation-header p {
+            margin: 4px 0 0;
+            font-size: 10px;
+            color: #777;
+        }
+
+
+    .view-all-btn {
+        background: #21003d;
+        color: white;
+        text-decoration: none;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+
+        .view-all-btn:hover {
+            background: #35005f;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(33,0,61,.16);
+        }
+
+
+    /* =========================================================
+           GOAL BANNER
+        ========================================================= */
+
+    .goal-banner {
+        position: relative;
+        overflow: hidden;
+        background: #21003d;
+        color: white;
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 14px;
+        animation: slideUp .6s ease .8s both;
+    }
+
+
+        .goal-banner::after {
+            content: "";
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            right: -35px;
+            top: -50px;
+            border-radius: 50%;
+            background: rgba(241,155,136,.18);
+            animation: floatCircle 5s ease-in-out infinite;
+        }
+
+
+        .goal-banner h3 {
+            position: relative;
+            z-index: 2;
+            margin: 0 0 5px;
+            font-size: 13px;
+        }
+
+
+        .goal-banner p {
+            position: relative;
+            z-index: 2;
+            margin: 0;
+            font-size: 10px;
+            color: #ddd;
+        }
+
+
+    /* =========================================================
+           RECOMMENDATION CARDS
+        ========================================================= */
+
+    .recommendation-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+    }
+
+
+    .recommendation-card {
+        position: relative;
+        background: white;
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 5px 18px rgba(0,0,0,.06);
+        opacity: 0;
+        animation: scaleIn .5s ease forwards;
+        transition: transform .25s ease, box-shadow .25s ease;
+    }
+
+
+        .recommendation-card:nth-child(1) {
+            animation-delay: .85s;
+        }
+
+
+        .recommendation-card:nth-child(2) {
+            animation-delay: .95s;
+        }
+
+
+        .recommendation-card:nth-child(3) {
+            animation-delay: 1.05s;
+        }
+
+
+        .recommendation-card:nth-child(4) {
+            animation-delay: 1.15s;
+        }
+
+
+        .recommendation-card:nth-child(5) {
+            animation-delay: 1.25s;
+        }
+
+
+        .recommendation-card:nth-child(6) {
+            animation-delay: 1.35s;
+        }
+
+
+        .recommendation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 28px rgba(33,0,61,.10);
+        }
+
+
+    .recommendation-icon {
+        font-size: 27px;
+        margin-bottom: 8px;
+    }
+
+
+    .recommendation-card h3 {
+        margin: 0 0 8px;
+        font-size: 17px;
+        font-weight: 600;
+    }
+
+
+    .workout-type {
+        display: inline-block;
+        background: #f3e7ff;
+        color: #21003d;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+
+    .recommendation-info {
+        margin-top: 13px;
+        font-size: 11px;
+        line-height: 1.8;
+    }
+
+
+    .workout-view-btn {
+        display: inline-block;
+        margin-top: 12px;
+        background: #eee7f5;
+        color: #21003d;
+        text-decoration: none;
+        padding: 7px 12px;
+        border-radius: 8px;
+        font-size: 10px;
+        font-weight: 600;
+        transition: transform .2s ease, background .2s ease;
+    }
+
+
+        .workout-view-btn:hover {
+            background: #21003d;
+            color: white;
+            transform: translateX(3px);
+        }
+
+
+    /* =========================================================
+           NO RECOMMENDATION
+        ========================================================= */
+
+    .no-recommendation {
+        background: white;
+        padding: 35px;
+        border-radius: 16px;
+        text-align: center;
+        box-shadow: 0 5px 18px rgba(0,0,0,.05);
+        animation: scaleIn .6s ease both;
+    }
+
+
+        .no-recommendation h3 {
+            margin: 0 0 8px;
+            font-size: 17px;
+        }
+
+
+        .no-recommendation p {
+            margin: 0;
+            color: #777;
+            font-size: 11px;
+        }
+
+
+    /* =========================================================
+           RESPONSIVE
+        ========================================================= */
+
+    @@media (max-width: 850px) {
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+
+
+        .recommendation-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+
+    @@media (max-width: 550px) {
+
+        .dashboard-container {
+            padding: 0 12px;
+        }
+
+
+        .recommendation-grid {
+            grid-template-columns: 1fr;
+        }
+
+
+        .recommendation-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+
+        .welcome-banner {
+            padding: 24px;
+        }
+
+
+            .welcome-banner h1 {
+                font-size: 21px;
+            }
+    }
+
+
+    /* =========================================================
+           REDUCE MOTION
+        ========================================================= */
+
+    @@media (prefers-reduced-motion: reduce) {
+
+        *,
+        *::before,
+        *::after {
+            animation-duration: .01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: .01ms !important;
+        }
+    }
+
+</style>
+
+
+<!-- =========================================================
+     DASHBOARD
+========================================================= -->
+
+<div class="dashboard-container">
+
+
+    <!-- =====================================================
+         WELCOME
+    ====================================================== -->
+
+    <div class="welcome-banner">
+
+        <div class="welcome-circle"></div>
+
+        <h1>
+            Welcome to FitWise BD 👋
+        </h1>
+
+        <p>
+            Hello, @fullName! Your personal fitness and nutrition dashboard.
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         STATISTICS
+    ====================================================== -->
+
+    <div class="stats-grid">
+
+
+        <!-- BMI -->
+
+        <div class="stat-card">
+
+            <div class="stat-title">
+                ⚖️ BMI
+            </div>
+
+            <div class="stat-value">
+
+                @if (bmi > 0)
+                {
+                    @bmi.ToString("0.0")
+                }
+                else
+                {
+                    @:--
+                }
 
             </div>
 
-
-            <!-- =========================
-                 DAILY CALORIES
-            ========================= -->
-
-            <div class="card">
-
-                <h3>
-                    🔥 Daily Calories
-                </h3>
-
-                <div class="value">
-
-                    @if (calories > 0)
-                    {
-                        @calories.ToString("0")
-                    }
-                    else
-                    {
-                        @:--
-                    }
-
-                </div>
-
-                <span class="unit">
-                    kcal / day
-                </span>
-
-            </div>
-
-
-            <!-- =========================
-                 WORKOUT
-            ========================= -->
-
-            <div class="card">
-
-                <h3>
-                    🏃 Workout
-                </h3>
-
-                <div class="value">
-                    @workoutMinutes
-                </div>
-
-                <span class="unit">
-                    minutes today
-                </span>
-
+            <div class="stat-subtitle">
+                @bmiStatus
             </div>
 
         </div>
 
 
-        <!-- =========================
-             LOWER SECTIONS
-        ========================= -->
+        <!-- DAILY CALORIES -->
 
-        <div class="sections">
+        <div class="stat-card">
+
+            <div class="stat-title">
+                🔥 Daily Calories
+            </div>
+
+            <div class="stat-value">
+
+                @if (calories > 0)
+                {
+                    @calories.ToString("0")
+                }
+                else
+                {
+                    @:--
+                }
+
+            </div>
+
+            <div class="stat-subtitle">
+                kcal / day
+            </div>
+
+        </div>
 
 
-            <!-- =========================
-                 WORKOUT
-            ========================= -->
+        <!-- WORKOUT -->
 
-            <div class="section">
+        <div class="stat-card">
 
-                <h2>
-                    Today's Workout
-                </h2>
+            <div class="stat-title">
+                🏃 Workout
+            </div>
 
-                <div class="item">
+            <div class="stat-value">
+                @workoutMinutes
+            </div>
 
-                    <span>
-                        Push Ups
-                    </span>
+            <div class="stat-subtitle">
+                @(ViewBag.WorkoutMinutes != null ? "minutes today" : "suggested daily activity")
+            </div>
 
-                    <strong>
-                        3 × 15
-                    </strong>
+        </div>
 
-                </div>
+    </div>
 
-                <div class="item">
 
-                    <span>
-                        Squats
-                    </span>
+    <!-- =====================================================
+         WORKOUT + NUTRITION
+    ====================================================== -->
 
-                    <strong>
-                        3 × 20
-                    </strong>
+    <div class="dashboard-grid">
 
-                </div>
 
-                <div class="item">
+        <!-- =================================================
+             TODAY'S WORKOUT
+        ================================================== -->
 
-                    <span>
-                        Plank
-                    </span>
+        <div class="dashboard-card">
 
-                    <strong>
-                        3 × 45 sec
-                    </strong>
+            <div class="card-title">
+                🏃 Today's Workout
+            </div>
 
-                </div>
 
-                <a href="#"
-                   class="btn">
+            @if (hasProfile && recommendedWorkouts.Any())
+            {
+
+                foreach (var workout in recommendedWorkouts.Take(3))
+                {
+
+                    <div class="workout-row">
+
+                        <div>
+
+                            <strong>
+                                @workout.Name
+                            </strong>
+
+                            <small>
+                                @workout.Type
+                            </small>
+
+                        </div>
+
+
+                        <div class="workout-stats">
+
+                            @if (workout.Sets.HasValue)
+                            {
+                                @workout.Sets
+                                <span> × </span>
+                            }
+
+                            @if (workout.Reps.HasValue)
+                            {
+                                @workout.Reps
+                            }
+
+                        </div>
+
+                    </div>
+
+                }
+
+
+                <a asp-controller="Workout"
+                   asp-action="Index"
+                   class="view-btn">
 
                     View Workout
 
                 </a>
 
-            </div>
+            }
+
+            else if (!hasProfile)
+            {
+
+                <p style="font-size:12px;">
+
+                    Complete your profile to receive
+                    personalized workout suggestions.
+
+                </p>
 
 
-            <!-- =========================
-                 NUTRITION
-            ========================= -->
+                <a asp-controller="UserProfile"
+                   asp-action="Index"
+                   class="view-btn">
 
-            <div class="section">
-
-                <h2>
-                    Today's Nutrition
-                </h2>
-
-                <div class="item">
-
-                    <span>
-                        Breakfast
-                    </span>
-
-                    <strong>
-                        450 kcal
-                    </strong>
-
-                </div>
-
-                <div class="item">
-
-                    <span>
-                        Lunch
-                    </span>
-
-                    <strong>
-                        650 kcal
-                    </strong>
-
-                </div>
-
-                <div class="item">
-
-                    <span>
-                        Dinner
-                    </span>
-
-                    <strong>
-                        550 kcal
-                    </strong>
-
-                </div>
-
-                <a href="/Foods"
-                   class="btn">
-
-                    View Nutrition
+                    Complete Profile
 
                 </a>
 
-            </div>
+            }
+
+            else
+            {
+
+                <p style="font-size:12px;">
+
+                    No workout recommendations available yet.
+
+                </p>
+
+
+                <a asp-controller="Workout"
+                   asp-action="Index"
+                   class="view-btn">
+
+                    View Workouts
+
+                </a>
+
+            }
 
         </div>
 
-    </main>
 
-</body>
+        <!-- =================================================
+             TODAY'S NUTRITION
+             SUMMARY ONLY
+        ================================================== -->
 
-</html>
+        <div class="dashboard-card nutrition-summary-card">
+
+
+            <!-- HEADER -->
+
+            <div class="nutrition-summary-header">
+
+                <div class="card-title">
+
+                    🍎 Today's Nutrition
+
+                </div>
+
+                <div class="nutrition-status-dot"></div>
+
+            </div>
+
+
+            <!-- =================================================
+                 BREAKFAST
+            ================================================== -->
+
+            <div class="nutrition-summary-row">
+
+                <span>
+                    🌅 Breakfast
+                </span>
+
+                <strong>
+                    @breakfastCalories.ToString("0") kcal
+                </strong>
+
+            </div>
+
+
+            <!-- =================================================
+                 LUNCH
+            ================================================== -->
+
+            <div class="nutrition-summary-row">
+
+                <span>
+                    🍛 Lunch
+                </span>
+
+                <strong>
+                    @lunchCalories.ToString("0") kcal
+                </strong>
+
+            </div>
+
+
+            <!-- =================================================
+                 DINNER
+            ================================================== -->
+
+            <div class="nutrition-summary-row">
+
+                <span>
+                    🌙 Dinner
+                </span>
+
+                <strong>
+                    @dinnerCalories.ToString("0") kcal
+                </strong>
+
+            </div>
+
+
+            <!-- =================================================
+                 SNACKS
+            ================================================== -->
+
+            <div class="nutrition-summary-row">
+
+                <span>
+                    🍌 Snacks
+                </span>
+
+                <strong>
+                    @snacksCalories.ToString("0") kcal
+                </strong>
+
+            </div>
+
+
+            <!-- DIVIDER -->
+
+            <div class="nutrition-divider"></div>
+
+
+            <!-- =================================================
+                 TOTAL
+            ================================================== -->
+
+            <div class="nutrition-total-row">
+
+                <span>
+                    Total
+                </span>
+
+                <strong>
+                    @totalNutritionCalories.ToString("0") kcal
+                </strong>
+
+            </div>
+
+
+            <!-- =================================================
+                 NEXT MEAL
+            ================================================== -->
+
+            <div class="next-meal-box">
+
+                <div class="next-meal-title">
+
+                    💡 Next Meal Suggestion
+
+                </div>
+
+
+                @if (nextMeal == "All meals logged")
+                {
+
+                    <p>
+                        Great! You have logged all your meals today.
+                    </p>
+
+                }
+                else
+                {
+
+                    <p>
+
+                        Your next meal is
+                        <strong>@nextMeal</strong>.
+
+                    </p>
+
+                }
+
+
+                <div class="remaining-calories">
+
+                    You have
+
+                    <strong>
+                        @remainingCalories.ToString("0") kcal
+                    </strong>
+
+                    remaining today.
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 VIEW NUTRITION
+
+IMPORTANT:
+                 This goes to Nutrition/Index
+                 NOT Foods/Index
+            ================================================== -->
+
+            <a asp-controller="Nutrition"
+               asp-action="Index"
+               class="nutrition-details-btn">
+
+                View Nutrition →
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- DASHBOARD: PROGRESS CHART SUMMARY ONLY -->
+@{
+    var progressLogs = ViewBag.ProgressLogs as IEnumerable<FitWiseBD.Models.ProgressLog>
+        ?? Enumerable.Empty<FitWiseBD.Models.ProgressLog>();
+
+    // Latest progress record
+    var latestProgress = progressLogs
+        .OrderByDescending(p => p.LogDate)
+        .ThenByDescending(p => p.Id)
+        .FirstOrDefault();
+
+    // Fitness goal
+    var profileForProgress = Model;
+
+    string progressGoal = string.IsNullOrWhiteSpace(profileForProgress?.FitnessGoal)
+        ? "Your Fitness Journey"
+        : profileForProgress.FitnessGoal;
+
+    // Last 7 calendar days
+    var today = DateTime.Today;
+    var weekStart = today.AddDays(-6);
+
+    var weeklyActivity = Enumerable.Range(0, 7)
+        .Select(offset =>
+        {
+            var date = weekStart.AddDays(offset);
+
+            var dayLogs = progressLogs
+                .Where(p => p.LogDate.Date == date)
+                .ToList();
+
+            return new
+            {
+                Date = date,
+                Minutes = dayLogs.Sum(p => p.WorkoutMinutes),
+                Sessions = dayLogs.Sum(p => p.WorkoutSessions)
+            };
+        })
+        .ToList();
+
+    // Weekly statistics
+    int totalWeeklyMinutes = weeklyActivity.Sum(x => x.Minutes);
+
+    int totalWeeklySessions = weeklyActivity
+    .Where(x => x.Minutes > 0)
+    .Count();
+
+    int activeDays = weeklyActivity.Count(x => x.Minutes > 0);
+
+    int maxMinutes = Math.Max(
+        1,
+        weeklyActivity.Max(x => x.Minutes)
+    );
+
+    // Weight chart: retain the existing weight history
+    var weightLogs = progressLogs
+        .Where(p => p.Weight.HasValue)
+        .OrderBy(p => p.LogDate)
+        .ThenBy(p => p.Id)
+        .TakeLast(7)
+        .ToList();
+
+    double minWeight = weightLogs.Any()
+        ? weightLogs.Min(p => p.Weight!.Value)
+        : 0;
+
+    double maxWeight = weightLogs.Any()
+        ? weightLogs.Max(p => p.Weight!.Value)
+        : 0;
+
+    double weightPadding = Math.Max(
+        1.0,
+        (maxWeight - minWeight) * 0.15
+    );
+
+    double chartMinWeight = minWeight - weightPadding;
+    double chartMaxWeight = maxWeight + weightPadding;
+
+    double chartWeightRange = Math.Max(
+        1.0,
+        chartMaxWeight - chartMinWeight
+    );
+
+    string weightChartPoints = string.Join(
+        " ",
+        weightLogs.Select((p, i) =>
+        {
+            double x = weightLogs.Count == 1
+                ? 320
+                : 48 + i * (544.0 / (weightLogs.Count - 1));
+
+            double y = 170 -
+                ((p.Weight!.Value - chartMinWeight) / chartWeightRange) * 125;
+
+            return x.ToString("0.##", CultureInfo.InvariantCulture)
+                + ","
+                + y.ToString("0.##", CultureInfo.InvariantCulture);
+        })
+    );
+}
+
+    <!-- FitWise AI Assistant Dashboard Card -->
+    <div class="ai-assistant-dashboard-card">
+        <div class="ai-assistant-icon">✨</div>
+
+        <div class="ai-assistant-content">
+            <h3>FitWise AI Assistant</h3>
+
+            <p>
+                Get personalized workout and nutrition recommendations
+                with your AI fitness companion.
+            </p>
+
+            <a asp-controller="FitnessAi"
+               asp-action="Index"
+               class="ai-assistant-button">
+                Chat with AI <span>→</span>
+            </a>
+        </div>
+
+        <div class="ai-assistant-decoration">💪</div>
+    </div>
+
+    <!-- Existing Your Fitness Progress section starts below -->
+
+    <section class="dashboard-progress-summary">
+        <div class="dashboard-progress-heading">
+            <div>
+                <h2>📈 Your Fitness Progress</h2>
+                <p>A quick visual summary of your recorded progress.</p>
+            </div>
+            <a asp-controller="Progress" asp-action="Index" class="dashboard-progress-link">
+                View Details <span aria-hidden="true">→</span>
+            </a>
+        </div>
+
+        <div class="dashboard-runner-banner">
+            <div class="dashboard-runner-copy">
+                <span class="dashboard-runner-kicker">KEEP MOVING FORWARD</span>
+                <h3>@progressGoal</h3>
+                <p>Small steps today. Stronger habits tomorrow.</p>
+            </div>
+            <div class="dashboard-runner-track" aria-label="Animated running person">
+                <span class="dashboard-runner">🏃‍♀️</span>
+                <span class="dashboard-runner-line"></span>
+            </div>
+            <span class="dashboard-banner-orb"></span>
+        </div>
+
+        <div class="dashboard-chart-grid">
+            <article class="dashboard-chart-card">
+                <div class="dashboard-chart-heading">
+                    <div>
+                        <h3>Weight Trend</h3>
+                        <p>Latest @weightLogs.Count weight record(s)</p>
+                    </div>
+                    @if (latestProgress?.Weight.HasValue == true)
+                    {
+                        <div class="chart-current-value">
+                            <strong>@latestProgress.Weight.Value.ToString("0.0") kg</strong>
+                            <span>Latest weight</span>
+                        </div>
+                    }
+                </div>
+
+               @if (weightLogs.Any())
+{
+    <div class="weight-chart-wrap">
+        <svg class="weight-chart"
+             viewBox="0 0 640 220"
+             role="img"
+             aria-label="Weight trend chart">
+
+            <defs>
+                <linearGradient id="weightAreaGradient"
+                                x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%"
+                          stop-color="#7c3aed"
+                          stop-opacity="0.24" />
+                    <stop offset="100%"
+                          stop-color="#7c3aed"
+                          stop-opacity="0.01" />
+                </linearGradient>
+            </defs>
+
+            <line x1="48" y1="45" x2="592" y2="45"
+                  class="chart-gridline" />
+            <line x1="48" y1="85" x2="592" y2="85"
+                  class="chart-gridline" />
+            <line x1="48" y1="125" x2="592" y2="125"
+                  class="chart-gridline" />
+            <line x1="48" y1="170" x2="592" y2="170"
+                  class="chart-axis" />
+
+            <text x="5" y="49" class="chart-axis-label">
+                @chartMaxWeight.ToString("0.0")
+            </text>
+
+            <text x="5" y="129" class="chart-axis-label">
+                @(((chartMinWeight + chartMaxWeight) / 2.0).ToString("0.0"))
+            </text>
+
+            <text x="5" y="174" class="chart-axis-label">
+                @chartMinWeight.ToString("0.0")
+            </text>
+
+            @if (weightLogs.Count > 1)
+            {
+                var areaPoints = "48,170 " + weightChartPoints + " 592,170";
+
+                <polygon points="@areaPoints"
+                         fill="url(#weightAreaGradient)" />
+
+                <polyline points="@weightChartPoints"
+                          class="weight-chart-line" />
+            }
+
+            @for (int i = 0; i < weightLogs.Count; i++)
+            {
+                double pointX = weightLogs.Count == 1
+                    ? 320
+                    : 48 + i * (544.0 / (weightLogs.Count - 1));
+
+                double pointY = 170 -
+                    ((weightLogs[i].Weight!.Value - chartMinWeight)
+                    / chartWeightRange) * 125;
+
+                string xCoordinate =
+                    pointX.ToString("0.##", CultureInfo.InvariantCulture);
+
+                string yCoordinate =
+                    pointY.ToString("0.##", CultureInfo.InvariantCulture);
+
+                string labelY =
+                    Math.Max(20, pointY - 12)
+                    .ToString("0.##", CultureInfo.InvariantCulture);
+
+                string weightLabel =
+                    weightLogs[i].Weight!.Value.ToString("0.0");
+
+                string dateLabel =
+                    weightLogs[i].LogDate.ToString("dd MMM");
+
+                <circle cx="@xCoordinate"
+                        cy="@yCoordinate"
+                        r="5"
+                        class="weight-chart-point" />
+
+               <svg:text x="@xCoordinate"
+          y="@labelY"
+          text-anchor="middle"
+          class="chart-point-label">@weightLabel</svg:text>
+
+<svg:text x="@xCoordinate"
+          y="197"
+          text-anchor="middle"
+          class="chart-date-label">@dateLabel</svg:text>
+            }
+        </svg>
+    </div>
+}
+else
+{
+    <div class="dashboard-chart-empty">
+        <span>📉</span>
+        <strong>No weight trend to display yet</strong>
+        <p>
+            Your existing progress entries will appear here
+            when they include a weight.
+        </p>
+    </div>
+}
+</article>
+<!-- WEEKLY WORKOUT ACTIVITY -->
+
+<article class="dashboard-chart-card">
+
+    <div class="dashboard-chart-heading">
+        <div>
+            <h3>🏃 Weekly Workout Activity</h3>
+            <p>Your workout activity over the last 7 days</p>
+        </div>
+    </div>
+
+    <!-- WEEKLY STATISTICS -->
+
+    <div class="weekly-stats-grid">
+
+        <div class="weekly-stat">
+            <span>Total Minutes</span>
+            <strong>@totalWeeklyMinutes</strong>
+        </div>
+
+        <div class="weekly-stat">
+            <span>Active Days</span>
+            <strong>@activeDays / 7</strong>
+        </div>
+
+        <div class="weekly-stat">
+            <span>Workout Sessions</span>
+            <strong>@totalWeeklySessions</strong>
+        </div>
+
+    </div>
+
+    <!-- ACTIVITY BAR CHART -->
+
+    <div class="activity-bars">
+
+        @foreach (var day in weeklyActivity)
+        {
+            var barHeight = day.Minutes > 0
+                ? Math.Max(
+                    4,
+                    (int)Math.Round(
+                        day.Minutes * 100.0 / maxMinutes
+                    )
+                )
+                : 0;
+
+            <div class="activity-bar-item">
+
+                <span class="activity-bar-value">
+                    @day.Minutes min
+                </span>
+
+                <div class="activity-bar-track">
+
+                    <div class="activity-bar-fill"
+                         style="height: @(barHeight)%;">
+
+                    </div>
+
+                </div>
+
+                <span class="activity-bar-date">
+                    @day.Date.ToString("ddd")
+                </span>
+
+                @if (day.Minutes == 0)
+                {
+                    <small>No activity recorded</small>
+                }
+                else
+                {
+                    <small>@day.Sessions session(s)</small>
+                }
+
+            </div>
+        }
+
+    </div>
+
+</article>
+    
+<style>
+    .dashboard-progress-summary {
+        margin: 30px 0 36px;
+        color: #21003d;
+    }
+
+    .dashboard-progress-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .dashboard-progress-heading h2 {
+        margin: 0 0 5px;
+        font-size: 23px;
+        font-weight: 750;
+    }
+
+    .dashboard-progress-heading p {
+        margin: 0;
+        color: #888;
+        font-size: 12px;
+    }
+
+    .dashboard-progress-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 22px;
+        background: #21003d;
+        color: #fff;
+        text-decoration: none;
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+        transition: transform .2s ease, background .2s ease;
+    }
+
+    .dashboard-progress-link:hover {
+        background: #421064;
+        color: #fff;
+        transform: translateY(-2px);
+    }
+
+    .dashboard-runner-banner {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        min-height: 122px;
+        padding: 23px 26px;
+        margin-bottom: 17px;
+        border-radius: 18px;
+        background: linear-gradient(
+            115deg,
+            #21003d 0%,
+            #421064 65%,
+            #542080 100%
+        );
+        color: #fff;
+    }
+
+    .dashboard-runner-copy {
+        position: relative;
+        z-index: 2;
+    }
+
+    .dashboard-runner-kicker {
+        color: #dec8f2;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+    }
+
+    .dashboard-runner-copy h3 {
+        margin: 8px 0;
+        font-size: 23px;
+    }
+
+    .dashboard-runner-copy p {
+        margin: 0;
+        color: #e7d9f2;
+        font-size: 11px;
+    }
+
+    .dashboard-runner-track {
+        position: relative;
+        z-index: 2;
+        flex: 0 0 155px;
+        height: 74px;
+        overflow: hidden;
+    }
+
+    .dashboard-runner {
+        position: absolute;
+        left: 0;
+        bottom: 13px;
+        font-size: 39px;
+        animation: dashboardRunnerMove 3.2s ease-in-out infinite alternate;
+    }
+
+    .dashboard-runner-line {
+        position: absolute;
+        bottom: 8px;
+        left: 0;
+        right: 0;
+        border-bottom: 2px dashed rgba(255,255,255,.6);
+    }
+
+    .dashboard-banner-orb {
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        right: -55px;
+        top: -95px;
+        background: rgba(255,255,255,.08);
+    }
+
+    /* Chart layout */
+    .dashboard-chart-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .dashboard-chart-card {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        background: #fff;
+        border: 1px solid #f0eaf5;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 6px 22px rgba(33,0,61,.055);
+    }
+
+    .dashboard-chart-heading {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .dashboard-chart-heading h3 {
+        margin: 0 0 5px;
+        font-size: 16px;
+    }
+
+    .dashboard-chart-heading p {
+        margin: 0;
+        color: #92909a;
+        font-size: 10px;
+    }
+
+    .chart-current-value {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+        white-space: nowrap;
+    }
+
+    .chart-current-value strong {
+        color: #421064;
+        font-size: 17px;
+    }
+
+    .chart-current-value span {
+        color: #999;
+        font-size: 9px;
+    }
+
+    /* Full-width weight chart */
+    .weight-chart-wrap {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        overflow-x: auto;
+    }
+
+    .weight-chart {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        min-height: 180px;
+        box-sizing: border-box;
+        overflow: visible;
+    }
+
+    .chart-gridline {
+        stroke: #eee7f5;
+        stroke-width: 1;
+        stroke-dasharray: 4 5;
+    }
+
+    .chart-axis {
+        stroke: #dcd3e6;
+        stroke-width: 1.2;
+    }
+
+    .chart-axis-label {
+        fill: #999;
+        font-size: 10px;
+    }
+
+    .weight-chart-line {
+        fill: none;
+        stroke: #6d28d9;
+        stroke-width: 3.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .weight-chart-point {
+        fill: #fff;
+        stroke: #6d28d9;
+        stroke-width: 3;
+    }
+
+    .chart-point-label {
+        fill: #421064;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .chart-date-label {
+        fill: #888;
+        font-size: 10px;
+    }
+
+    .dashboard-chart-empty {
+        min-height: 190px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 18px;
+        color: #421064;
+    }
+
+    .dashboard-chart-empty > span {
+        font-size: 31px;
+        margin-bottom: 9px;
+    }
+
+    .dashboard-chart-empty strong {
+        font-size: 12px;
+    }
+
+    .dashboard-chart-empty p {
+        max-width: 270px;
+        margin: 7px 0 0;
+        color: #999;
+        font-size: 10px;
+        line-height: 1.6;
+    }
+
+    .compact-empty {
+        min-height: 190px;
+    }
+
+    .activity-total {
+        color: #6d28d9;
+        background: #f5edfb;
+        padding: 7px 10px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .activity-bars {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-around;
+        gap: 9px;
+        min-height: 190px;
+        padding: 14px 4px 0;
+        border-bottom: 1px solid #eee7f5;
+    }
+
+    .activity-bar-item {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 7px;
+        height: 175px;
+    }
+
+    .activity-bar-value {
+        color: #421064;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .activity-bar-track {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        width: min(34px, 100%);
+        height: 120px;
+        border-radius: 9px 9px 3px 3px;
+        background: #f5effa;
+        overflow: hidden;
+    }
+
+    .activity-bar-fill {
+        width: 100%;
+        min-height: 4px;
+        border-radius: 8px 8px 2px 2px;
+        background: linear-gradient(180deg, #9b5de5, #421064);
+        animation: activityBarRise .8s ease both;
+    }
+
+    .activity-bar-date {
+        color: #92909a;
+        font-size: 9px;
+        white-space: nowrap;
+    }
+
+    @@keyframes dashboardRunnerMove {
+        0% {
+            transform: translateX(0) translateY(0);
+        }
+
+        50% {
+            transform: translateX(48px) translateY(-8px);
+        }
+
+        100% {
+            transform: translateX(96px) translateY(0);
+        }
+    }
+
+    @@keyframes activityBarRise {
+        from {
+            transform: scaleY(.15);
+            transform-origin: bottom;
+            opacity: .5;
+        }
+
+        to {
+            transform: scaleY(1);
+            transform-origin: bottom;
+            opacity: 1;
+        }
+    }
+
+    @@media (max-width: 800px) {
+        .dashboard-chart-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    @@media (max-width: 520px) {
+        .dashboard-progress-heading {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .dashboard-runner-banner {
+            padding: 18px;
+        }
+
+        .dashboard-runner-copy h3 {
+            font-size: 19px;
+        }
+
+        .dashboard-runner-track {
+            flex-basis: 90px;
+        }
+
+        .dashboard-runner {
+            font-size: 32px;
+        }
+
+        .dashboard-chart-card {
+            padding: 15px;
+        }
+
+        .dashboard-chart-heading {
+            flex-wrap: wrap;
+        }
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+        .dashboard-runner,
+        .activity-bar-fill {
+            animation: none;
+        }
+    }
+    /* FitWise AI Assistant — Dashboard Card */
+    .ai-assistant-dashboard-card {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        width: 100%;
+        margin: 22px 0;
+        padding: 26px 30px;
+        overflow: hidden;
+        border-radius: 18px;
+        background: linear-gradient(120deg, #26003d, #522080);
+        color: #fff;
+        box-shadow: 0 10px 28px rgba(45, 0, 70, 0.12);
+    }
+
+    .ai-assistant-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 58px;
+        height: 58px;
+        border-radius: 17px;
+        background: rgba(255, 255, 255, 0.13);
+        font-size: 30px;
+        animation: aiIconFloat 3s ease-in-out infinite;
+    }
+
+    .ai-assistant-content {
+        position: relative;
+        z-index: 1;
+        flex: 1;
+    }
+
+    .ai-assistant-content h3 {
+        margin: 0 0 9px;
+        font-size: 22px;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .ai-assistant-content p {
+        margin: 0 0 17px;
+        max-width: 600px;
+        font-size: 14px;
+        line-height: 1.7;
+        color: #eee3f8;
+    }
+
+    .ai-assistant-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 11px 19px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 10px;
+        background: #fff;
+        color: #300047;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .ai-assistant-button:hover {
+        color: #300047;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+    }
+
+    .ai-assistant-decoration {
+        position: absolute;
+        right: 35px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 58px;
+        opacity: 0.85;
+        animation: aiIconFloat 3s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+
+    @@keyframes aiIconFloat {
+        0%, 100% {
+            translate: 0 0;
+        }
+
+        50% {
+            translate: 0 -5px;
+        }
+    }
+
+   
+    @@media (max-width: 600px) {
+        .ai-assistant-dashboard-card {
+            gap: 13px;
+            padding: 20px 16px;
+            border-radius: 14px;
+        }
+
+        .ai-assistant-icon {
+            width: 43px;
+            height: 43px;
+            font-size: 23px;
+        }
+
+        .ai-assistant-content h3 {
+            font-size: 18px;
+        }
+
+        .ai-assistant-content p {
+            font-size: 12px;
+        }
+
+        .ai-assistant-decoration {
+            display: none;
+        }
+    }
+
+  
+    @@media (prefers-reduced-motion: reduce) {
+        .ai-assistant-icon,
+        .ai-assistant-decoration {
+            animation: none;
+        }
+    }
+    /* WEEKLY WORKOUT STATISTICS */
+
+.weekly-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+    margin: 22px 0;
+}
+
+.weekly-stat {
+    background: #f5effa;
+    border: 1px solid #eadff5;
+    border-radius: 14px;
+    padding: 18px;
+    transition: transform 0.25s ease,
+                box-shadow 0.25s ease;
+}
+
+.weekly-stat:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(33, 0, 61, 0.08);
+}
+
+.weekly-stat span {
+    display: block;
+    color: #766780;
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.weekly-stat strong {
+    color: #421064;
+    font-size: 25px;
+    font-weight: 750;
+}
+
+/* MOBILE RESPONSIVE */
+
+@@media (max-width: 600px) {
+    .weekly-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>

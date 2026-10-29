@@ -1,0 +1,282 @@
+﻿@model FitWiseBD.Models.ProgressLog
+
+@{
+    ViewData["Title"] = "Delete Progress";
+}
+
+<style>
+
+    .delete-page {
+        max-width: 650px;
+        margin: 50px auto;
+        padding: 0 20px;
+    }
+
+    .delete-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 8px 28px rgba(0,0,0,.07);
+        animation: fadeUp .6s ease both;
+    }
+
+    .delete-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #fff1f1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 27px;
+        margin: 0 auto 15px;
+    }
+
+    .delete-title {
+        text-align: center;
+        color: #21003d;
+        font-size: 23px;
+        font-weight: 700;
+        margin-bottom: 7px;
+    }
+
+    .delete-subtitle {
+        text-align: center;
+        color: #777;
+        font-size: 11px;
+        margin-bottom: 25px;
+    }
+
+    .progress-info {
+        background: #f8f6fa;
+        border-radius: 15px;
+        padding: 18px;
+        margin-bottom: 22px;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 9px 0;
+        border-bottom: 1px solid #e8e3eb;
+        font-size: 11px;
+    }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+    .info-label {
+        color: #777;
+    }
+
+    .info-value {
+        color: #21003d;
+        font-weight: 600;
+    }
+
+    .warning {
+        background: #fff8e8;
+        border-left: 4px solid #f0ad4e;
+        padding: 12px 14px;
+        border-radius: 8px;
+        font-size: 10px;
+        color: #72551d;
+        margin-bottom: 22px;
+    }
+
+    .delete-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .cancel-btn {
+        text-decoration: none;
+        color: #666;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+        .cancel-btn:hover {
+            color: #21003d;
+        }
+
+    .delete-btn {
+        border: none;
+        background: #c62828;
+        color: white;
+        padding: 11px 22px;
+        border-radius: 22px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: .25s ease;
+    }
+
+        .delete-btn:hover {
+            background: #a91f1f;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 18px rgba(198,40,40,.18);
+        }
+
+    @@keyframes fadeUp {
+
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+</style>
+
+
+<div class="delete-page">
+
+    <div class="delete-card">
+
+
+        <div class="delete-icon">
+            🗑️
+        </div>
+
+
+        <div class="delete-title">
+            Delete Progress Entry?
+        </div>
+
+
+        <div class="delete-subtitle">
+
+            Are you sure you want to permanently delete this
+            progress record?
+
+        </div>
+
+
+        <div class="progress-info">
+
+
+            <div class="info-row">
+
+                <span class="info-label">
+                    📅 Date
+                </span>
+
+                <span class="info-value">
+                    @Model.LogDate.ToString("dd MMM yyyy")
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="info-label">
+                    ⚖️ Weight
+                </span>
+
+                <span class="info-value">
+
+                    @(Model.Weight?.ToString("0.0") ?? "--")
+                    kg
+
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="info-label">
+                    🏋️ Workout Sessions
+                </span>
+
+                <span class="info-value">
+                    @Model.WorkoutSessions
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="info-label">
+                    ⏱️ Workout Time
+                </span>
+
+                <span class="info-value">
+                    @Model.WorkoutMinutes minutes
+                </span>
+
+            </div>
+
+
+            @if (!string.IsNullOrWhiteSpace(Model.Notes))
+            {
+
+                <div class="info-row">
+
+                    <span class="info-label">
+                        📝 Notes
+                    </span>
+
+                    <span class="info-value">
+                        @Model.Notes
+                    </span>
+
+                </div>
+
+            }
+
+
+        </div>
+
+
+        <div class="warning">
+
+            ⚠️ This action cannot be undone. The selected
+            progress entry will be permanently removed.
+
+        </div>
+
+
+        <form asp-action="Delete"
+              asp-route-id="@Model.Id"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+
+            <div class="delete-actions">
+
+
+                <a asp-action="Index"
+                   class="cancel-btn">
+
+                    ← Cancel
+
+                </a>
+
+
+                <button type="submit"
+                        class="delete-btn">
+
+                    Delete Entry
+
+                </button>
+
+
+            </div>
+
+        </form>
+
+
+    </div>
+
+</div>

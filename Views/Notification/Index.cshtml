@@ -1,0 +1,280 @@
+﻿@model IEnumerable<FitWiseBD.Models.Notification>
+
+@{
+    ViewData["Title"] = "Notifications";
+
+    var unreadCount = Model.Count(n => !n.IsRead);
+}
+
+<style>
+    .notification-page {
+        max-width: 950px;
+        margin: 35px auto;
+        padding: 25px;
+        color: #32104f;
+    }
+
+    .notification-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .notification-header h2 {
+        font-size: 28px;
+        font-weight: 750;
+        margin-bottom: 5px;
+    }
+
+    .notification-header p {
+        color: #81718d;
+        margin: 0;
+    }
+
+    .notification-count {
+        background: #eee3ff;
+        color: #7027b5;
+        padding: 8px 14px;
+        border-radius: 20px;
+        font-weight: 700;
+    }
+
+    .notification-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+        padding: 20px;
+        margin-bottom: 14px;
+        background: #fff;
+        border: 1px solid #eee5f5;
+        border-radius: 16px;
+        box-shadow: 0 5px 18px rgba(48, 10, 75, 0.04);
+        transition: 0.2s ease;
+    }
+
+    .notification-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(48, 10, 75, 0.08);
+    }
+
+    .notification-card.unread {
+        background: #faf6ff;
+        border-left: 4px solid #8b42d6;
+    }
+
+    .notification-icon {
+        width: 45px;
+        height: 45px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eee3ff;
+        border-radius: 13px;
+        font-size: 22px;
+    }
+
+    .notification-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .notification-content h3 {
+        font-size: 17px;
+        font-weight: 700;
+        margin: 2px 0 7px;
+    }
+
+    .notification-content p {
+        color: #766a80;
+        margin: 0 0 10px;
+        overflow-wrap: anywhere;
+    }
+
+    .notification-time {
+        font-size: 12px;
+        color: #9589a0;
+    }
+
+    .notification-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+    }
+
+    .notification-btn {
+        border: none;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 12px;
+        font-weight: 650;
+        cursor: pointer;
+    }
+
+    .btn-read {
+        background: #eee3ff;
+        color: #7027b5;
+    }
+
+    .btn-delete {
+        background: #fff0f0;
+        color: #c62828;
+    }
+
+    .btn-mark-all {
+        background: #7027b5;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 11px 16px;
+        font-weight: 650;
+        cursor: pointer;
+    }
+
+    .empty-notifications {
+        text-align: center;
+        padding: 55px 20px;
+        background: #fff;
+        border: 1px dashed #dfd0ec;
+        border-radius: 18px;
+    }
+
+    .empty-notifications .empty-icon {
+        font-size: 45px;
+        margin-bottom: 12px;
+    }
+
+    .empty-notifications h3 {
+        font-size: 20px;
+        font-weight: 750;
+    }
+
+    .empty-notifications p {
+        color: #887a94;
+    }
+
+    @@media (max-width: 600px) {
+        .notification-page {
+            padding: 15px;
+        }
+
+        .notification-card {
+            padding: 14px;
+        }
+    }
+</style>
+
+<div class="notification-page">
+
+    <div class="notification-header">
+        <div>
+            <h2>🔔 Notifications</h2>
+            <p>Stay updated with your fitness journey.</p>
+        </div>
+
+        <span class="notification-count">
+            @unreadCount Unread
+        </span>
+    </div>
+
+    @if (unreadCount > 0)
+    {
+        <form asp-action="MarkAllAsRead"
+              asp-controller="Notification"
+              method="post"
+              style="margin-bottom:20px;">
+
+            @Html.AntiForgeryToken()
+
+            <button type="submit" class="btn-mark-all">
+                ✓ Mark All as Read
+            </button>
+        </form>
+    }
+
+    @if (Model.Any())
+    {
+        @foreach (var item in Model)
+        {
+            var icon = item.Type switch
+            {
+                "Workout" => "🏋️",
+                "Progress" => "⚖️",
+                "Achievement" => "🏆",
+                "Nutrition" => "🥗",
+                _ => "🔔"
+            };
+
+            <div class="notification-card @(item.IsRead ? "" : "unread")">
+
+                <div class="notification-icon">
+                    @icon
+                </div>
+
+                <div class="notification-content">
+
+                    <h3>@item.Title</h3>
+
+                    <p>@item.Message</p>
+
+                    <div class="notification-time">
+                        @item.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
+                        · @(item.IsRead ? "Read" : "Unread")
+                    </div>
+
+                    <div class="notification-actions">
+
+                        @if (!item.IsRead)
+                        {
+                            <form asp-action="MarkAsRead"
+                                  asp-controller="Notification"
+                                  asp-route-id="@item.Id"
+                                  method="post">
+
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="notification-btn btn-read">
+                                    ✓ Mark as Read
+                                </button>
+                            </form>
+                        }
+
+                        <form asp-action="Delete"
+                              asp-controller="Notification"
+                              asp-route-id="@item.Id"
+                              method="post"
+                              onsubmit="return confirm('Delete this notification?');">
+
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="notification-btn btn-delete">
+                                🗑 Delete
+                            </button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="empty-notifications">
+            <div class="empty-icon">🔔</div>
+
+            <h3>You're all caught up!</h3>
+
+            <p>
+                You don't have any notifications yet.
+                New updates will appear here.
+            </p>
+        </div>
+    }
+
+</div>

@@ -1,0 +1,695 @@
+﻿@model IEnumerable<FitWiseBD.Models.Workout>
+
+@{
+    ViewData["Title"] = "Workouts";
+}
+
+<style>
+    /* ===== GLOBAL WORKOUT PAGE ===== */
+
+    body {
+        background: #f7f5f9;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #21003d;
+    }
+
+    .workout-container {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 28px;
+        box-sizing: border-box;
+        animation: fadeIn 0.6s ease;
+    }
+
+    /* ===== HEADER ===== */
+
+    .header {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(120deg, #21003d, #512080);
+        color: white;
+        padding: 38px;
+        border-radius: 22px;
+        margin-bottom: 28px;
+        box-shadow: 0 10px 30px rgba(33, 0, 61, 0.13);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .header:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 35px rgba(33, 0, 61, 0.2);
+    }
+
+    .header::after {
+        content: "";
+        position: absolute;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        right: -70px;
+        top: -120px;
+        background: rgba(244, 154, 138, 0.22);
+        pointer-events: none;
+    }
+
+    .header h1 {
+        font-size: clamp(25px, 3vw, 36px);
+        font-weight: 700;
+        margin-bottom: 12px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .header p {
+        color: #e7dff0;
+        font-size: 15px;
+        margin-bottom: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ===== TITLE AND ADD BUTTON ===== */
+
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 22px;
+    }
+
+    .top-bar h2 {
+        font-size: 25px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .add-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: #21003d;
+        color: white;
+        padding: 12px 22px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 700;
+        transition: all 0.25s ease;
+        box-shadow: 0 5px 14px rgba(33, 0, 61, 0.12);
+    }
+
+    .add-btn:hover {
+        background: #512080;
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 9px 20px rgba(33, 0, 61, 0.2);
+    }
+
+    /* ===== TABLE PANEL ===== */
+
+    .workout-table-wrapper {
+        width: 100%;
+        min-width: 0;
+        background: white;
+        padding: 26px;
+        border-radius: 20px;
+        box-shadow: 0 6px 28px rgba(33, 0, 61, 0.07);
+        box-sizing: border-box;
+        animation: slideUp 0.65s ease;
+    }
+
+    /* DataTables wrapper full width */
+
+    .workout-table-wrapper .dt-container,
+    .workout-table-wrapper .dataTables_wrapper {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    #workoutTable {
+        width: 100% !important;
+        border-collapse: separate !important;
+        border-spacing: 0;
+        margin-top: 16px !important;
+        color: #30213d;
+    }
+
+    /* ===== TABLE HEADER ===== */
+
+    #workoutTable thead th {
+        background: #21003d;
+        color: white;
+        padding: 17px 14px;
+        font-size: 13px;
+        font-weight: 700;
+        white-space: nowrap;
+        border: none;
+        vertical-align: middle;
+    }
+
+    #workoutTable thead th:first-child {
+        border-radius: 10px 0 0 0;
+    }
+
+    #workoutTable thead th:last-child {
+        border-radius: 0 10px 0 0;
+    }
+
+    /* ===== TABLE ROWS ===== */
+
+    #workoutTable tbody td {
+        padding: 15px 14px;
+        font-size: 13px;
+        vertical-align: middle;
+        border-color: #eee7f5;
+    }
+
+    #workoutTable tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    #workoutTable tbody tr:hover td {
+        background: #f5effb;
+    }
+
+    #workoutTable tbody tr:last-child td:first-child {
+        border-radius: 0 0 0 10px;
+    }
+
+    #workoutTable tbody tr:last-child td:last-child {
+        border-radius: 0 0 10px 0;
+    }
+
+    /* ===== ACTION BUTTONS ===== */
+
+    .workout-actions {
+        white-space: nowrap;
+        min-width: 150px;
+    }
+
+    .workout-actions .btn {
+        margin: 2px;
+        padding: 7px 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        transition: all 0.2s ease;
+    }
+
+    .workout-actions .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    }
+
+    .workout-actions .btn-primary {
+        background: #512080;
+    }
+
+    .workout-actions .btn-primary:hover {
+        background: #21003d;
+    }
+
+    .workout-actions .btn-warning {
+        background: #fff0d9;
+        color: #8a5700;
+    }
+
+    .workout-actions .btn-danger {
+        background: #ffe5e5;
+        color: #a30000;
+    }
+
+    /* ===== DATATABLE CONTROLS ===== */
+
+    .workout-table-wrapper .dt-layout-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 18px;
+        width: 100%;
+        margin: 12px 0;
+    }
+
+    .workout-table-wrapper .dt-length,
+    .workout-table-wrapper .dt-search,
+    .workout-table-wrapper .dt-info,
+    .workout-table-wrapper .dt-paging {
+        font-size: 13px;
+        color: #51435e;
+    }
+
+    .workout-table-wrapper .dt-search input,
+    .workout-table-wrapper .dt-length select {
+        border: 1px solid #ded5e8;
+        background: #fff;
+        color: #21003d;
+        border-radius: 9px;
+        padding: 9px 12px;
+        outline: none;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .workout-table-wrapper .dt-search input {
+        min-width: 220px;
+        margin-left: 8px;
+    }
+
+    .workout-table-wrapper .dt-search input:focus,
+    .workout-table-wrapper .dt-length select:focus {
+        border-color: #7542a3;
+        box-shadow: 0 0 0 3px rgba(117, 66, 163, 0.12);
+    }
+
+    /* ===== PAGINATION ===== */
+
+    .workout-table-wrapper .dt-paging .dt-paging-button {
+        border: 1px solid #e5d9ef !important;
+        background: white !important;
+        color: #21003d !important;
+        border-radius: 8px !important;
+        padding: 8px 13px !important;
+        margin: 0 3px !important;
+        transition: all 0.2s ease;
+    }
+
+    .workout-table-wrapper .dt-paging .dt-paging-button:hover {
+        background: #f0e6fa !important;
+        border-color: #7542a3 !important;
+        color: #21003d !important;
+        transform: translateY(-1px);
+    }
+
+    .workout-table-wrapper .dt-paging .dt-paging-button.current {
+        background: #21003d !important;
+        color: white !important;
+        border-color: #21003d !important;
+    }
+
+    .workout-table-wrapper .dt-paging .dt-paging-button.disabled {
+        opacity: 0.45;
+        cursor: not-allowed !important;
+    }
+
+    /* ===== EMPTY STATE ===== */
+
+    .empty {
+        background: white;
+        padding: 55px 25px;
+        border-radius: 20px;
+        text-align: center;
+        box-shadow: 0 6px 25px rgba(33, 0, 61, 0.06);
+    }
+
+    /* ===== ANIMATIONS ===== */
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(18px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ===== RESPONSIVE ===== */
+
+    @@media (min-width: 1600px) {
+        .workout-container {
+            padding: 32px 36px;
+        }
+
+        .workout-table-wrapper {
+            padding: 30px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .workout-container {
+            padding: 16px 12px;
+        }
+
+        .header {
+            padding: 25px 20px;
+            border-radius: 16px;
+        }
+
+        .top-bar {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .workout-table-wrapper {
+            padding: 14px;
+            border-radius: 14px;
+        }
+
+        .workout-table-wrapper .dt-layout-row {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .workout-table-wrapper .dt-search input {
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        #workoutTable thead th,
+        #workoutTable tbody td {
+            padding: 11px 10px;
+        }
+    }
+
+    /* Respect accessibility preferences */
+
+    @@media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+ /* ===== FULL WIDTH WORKOUT DATATABLE FIX ===== */
+
+.workout-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 20px 30px !important;
+    box-sizing: border-box;
+}
+
+/* Table panel full width */
+.workout-table-wrapper {
+    display: block;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+/* DataTables main wrapper */
+.workout-table-wrapper .dt-container,
+.workout-table-wrapper .dataTables_wrapper {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+/* DataTable itself */
+#workoutTable {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: auto;
+    border-collapse: separate !important;
+    border-spacing: 0;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* Ensure DataTables does not shrink the table */
+#workoutTable_wrapper,
+#workoutTable_wrapper .dt-layout-row,
+#workoutTable_wrapper .dt-layout-cell,
+.dt-container .dt-layout-row,
+.dt-container .dt-layout-cell {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+/* Keep search and page-size controls aligned */
+.workout-table-wrapper .dt-layout-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+/* Responsive horizontal scrolling */
+.workout-table-wrapper .table-responsive {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+/* Table cells */
+#workoutTable th,
+#workoutTable td {
+    padding: 14px 12px;
+    vertical-align: middle;
+}
+
+/* Mobile */
+@@media (max-width: 768px) {
+    .workout-container {
+        padding: 12px !important;
+    }
+
+    .workout-table-wrapper {
+        padding: 14px;
+    }
+
+    #workoutTable th,
+    #workoutTable td {
+        padding: 10px 8px;
+    }
+}
+</style>
+
+<div class="workout-container">
+
+    <!-- HEADER: PRESERVED -->
+
+    <div class="header">
+
+        <h1>🏃 Workout Library</h1>
+
+        <p>
+            Explore workouts recommended for your fitness goals.
+        </p>
+
+    </div>
+
+
+    <!-- TITLE AND ADMIN ADD BUTTON: PRESERVED -->
+
+    <div class="top-bar">
+
+        <h2>Workout Plans</h2>
+
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Create"
+               class="add-btn">
+                ＋ Add Workout
+            </a>
+        }
+
+    </div>
+
+
+    <!-- DATA TABLE ONLY: WORKOUT CARDS REMOVED -->
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="empty">
+
+            <h3>🏋️ No workouts available</h3>
+
+            <p>
+                The workout library is currently empty.
+            </p>
+
+        </div>
+    }
+    else
+    {
+        <div class="workout-table-wrapper">
+
+            <div class="table-responsive">
+
+                <table id="workoutTable"
+                       class="table table-striped table-hover table-bordered align-middle">
+
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Difficulty</th>
+                            <th>Sets</th>
+                            <th>Reps</th>
+                            <th>Duration</th>
+                            <th>Calories</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var workout in Model)
+                        {
+                            <tr>
+
+                                <td>
+                                    @workout.Name
+                                </td>
+
+                                <td>
+                                    @workout.Type
+                                </td>
+
+                                <td>
+                                    @workout.Difficulty
+                                </td>
+
+                                <td>
+                                    @workout.Sets
+                                </td>
+
+                                <td>
+                                    @workout.Reps
+                                </td>
+
+                                <td>
+                                    @if (workout.DurationMinutes.HasValue)
+                                    {
+                                        @($"{workout.DurationMinutes} min")
+                                    }
+                                    else
+                                    {
+                                        <span>—</span>
+                                    }
+                                </td>
+
+                                <td>
+                                    @workout.CaloriesBurned kcal
+                                </td>
+
+                                <td class="workout-actions">
+
+                                    <!-- VIEW: ALL USERS -->
+
+                                    <a asp-action="Details"
+                                       asp-route-id="@workout.Id"
+                                       class="btn btn-sm btn-primary">
+                                        View
+                                    </a>
+
+                                    <!-- EDIT AND DELETE: ADMIN ONLY -->
+
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a asp-action="Edit"
+                                           asp-route-id="@workout.Id"
+                                           class="btn btn-sm btn-warning">
+                                            Edit
+                                        </a>
+
+                                        <a asp-action="Delete"
+                                           asp-route-id="@workout.Id"
+                                           class="btn btn-sm btn-danger">
+                                            Delete
+                                        </a>
+                                    }
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+    }
+
+</div>
+
+
+@section Scripts {
+
+    <!-- DataTables JavaScript -->
+
+    <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+
+    <script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            const table = document.getElementById("workoutTable");
+
+            // Initialize DataTable only when workouts exist.
+            if (table && window.jQuery && $.fn.DataTable) {
+
+                if ($.fn.DataTable.isDataTable(table)) {
+                    $(table).DataTable().destroy();
+                }
+
+                $(table).DataTable({
+
+                    paging: true,
+
+                    searching: true,
+
+                    ordering: true,
+
+                    info: true,
+
+                    pageLength: 10,
+
+                    lengthMenu: [5, 10, 25, 50],
+
+                    order: [[0, "asc"]],
+
+                    scrollX: true,
+
+                    language: {
+                        search: "Search workouts:",
+                        lengthMenu: "Show _MENU_ workouts",
+                        info: "Showing _START_ to _END_ of _TOTAL_ workouts",
+                        infoEmpty: "No workouts available",
+                        infoFiltered: "(filtered from _MAX_ total workouts)",
+                        zeroRecords: "No matching workouts found",
+                        emptyTable: "No workouts available",
+                        paginate: {
+                            first: "First",
+                            last: "Last",
+                            previous: "Previous",
+                            next: "Next"
+                        }
+                    }
+
+                });
+
+            }
+
+        });
+    </script>
+
+}

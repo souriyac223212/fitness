@@ -18,10 +18,21 @@ namespace FitWiseBD.Models
         [Range(20, 300)]
         public double? Weight { get; set; }
 
+        // NEW: Target weight for fitness goal
+        [Range(20, 300)]
+        public double? TargetWeight { get; set; }
+
+        // NEW: Goal duration in months
+        [Range(1, 12)]
+        public int GoalDurationMonths { get; set; } = 5;
+
         public string? Gender { get; set; }
 
         public string? FitnessGoal { get; set; }
 
         public string? ActivityLevel { get; set; }
+
+        [StringLength(255)]
+        public string? ProfilePhotoPath { get; set; }
     }
 }

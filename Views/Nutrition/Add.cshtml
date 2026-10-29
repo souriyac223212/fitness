@@ -1,0 +1,228 @@
+﻿@model FitWiseBD.Models.NutritionLog
+
+@{
+    ViewData["Title"] = "Add Food";
+    var foods = ViewBag.Foods as List<FitWiseBD.Models.Food>;
+}
+
+<style>
+
+    body {
+        background: #f7f5f8;
+        font-family: Arial, sans-serif;
+        color: #21003d;
+    }
+
+    .add-container {
+        max-width: 650px;
+        margin: 50px auto;
+        padding: 0 20px;
+    }
+
+    .card {
+        background: white;
+        padding: 35px;
+        border-radius: 22px;
+        box-shadow: 0 5px 25px rgba(0,0,0,.07);
+    }
+
+    .header {
+        background: #21003d;
+        color: white;
+        padding: 25px;
+        border-radius: 18px;
+        margin-bottom: 25px;
+    }
+
+        .header h1 {
+            margin: 0 0 8px;
+        }
+
+        .header p {
+            margin: 0;
+            color: #ddd;
+        }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+
+    select,
+    input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-sizing: border-box;
+    }
+
+    .save-btn {
+        background: #21003d;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 25px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .back-btn {
+        display: inline-block;
+        margin-left: 10px;
+        color: #21003d;
+        text-decoration: none;
+    }
+
+    .validation {
+        color: #a30000;
+        margin-bottom: 15px;
+    }
+
+</style>
+
+
+<div class="add-container">
+
+    <div class="header">
+
+        <h1>🍎 Add Food</h1>
+
+        <p>
+            Add food to today's nutrition log.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <form asp-action="Add" method="post">
+
+            <div asp-validation-summary="ModelOnly"
+                 class="validation">
+            </div>
+
+
+            <!-- MEAL -->
+
+            <div class="form-group">
+
+                <label for="MealType">
+                    Meal
+                </label>
+
+                <select name="MealType"
+                        id="MealType">
+
+                    <option value="Breakfast">
+                        🌅 Breakfast
+                    </option>
+
+                    <option value="Lunch">
+                        🍱 Lunch
+                    </option>
+
+                    <option value="Dinner">
+                        🌙 Dinner
+                    </option>
+
+                    <option value="Snack">
+                        🍌 Snack
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- FOOD -->
+
+            <div class="form-group">
+
+                <label for="FoodId">
+                    Food
+                </label>
+
+                <select name="FoodId"
+                        id="FoodId"
+                        required>
+
+                    <option value="">
+                        -- Select Food --
+                    </option>
+
+                    @if (foods != null)
+                    {
+                        foreach (var food in foods)
+                        {
+                            <option value="@food.FoodId">
+
+                                @food.Name
+                                -
+                                @food.Calories kcal
+
+                            </option>
+                        }
+                    }
+
+                </select>
+
+            </div>
+
+
+            <!-- QUANTITY -->
+
+            <div class="form-group">
+
+                <label for="Quantity">
+                    Quantity / Serving
+                </label>
+
+                <input type="number"
+                       name="Quantity"
+                       id="Quantity"
+                       value="1"
+                       min="0.1"
+                       step="0.1"
+                       required />
+
+            </div>
+
+
+            <button type="submit"
+                    class="save-btn">
+
+                Add Food
+
+            </button>
+
+
+            <a asp-action="Index"
+               class="back-btn">
+
+                Cancel
+
+            </a>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    @{
+        await Html.RenderPartialAsync(
+            "_ValidationScriptsPartial"
+        );
+    }
+
+}

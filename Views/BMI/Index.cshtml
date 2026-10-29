@@ -1,0 +1,251 @@
+﻿@{
+    ViewData["Title"] = "BMI Calculator";
+}
+
+<style>
+    body {
+        background: #f7f5f8;
+        font-family: Arial, sans-serif;
+        color: #21003d;
+    }
+
+    .bmi-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .header {
+        background: #21003d;
+        color: white;
+        padding: 30px;
+        border-radius: 22px;
+        margin-bottom: 25px;
+    }
+
+        .header h1 {
+            margin: 0 0 8px 0;
+            font-size: 30px;
+        }
+
+        .header p {
+            margin: 0;
+            color: #ddd;
+        }
+
+    .bmi-card {
+        background: white;
+        border-radius: 20px;
+        padding: 35px;
+        box-shadow: 0 5px 20px rgba(0,0,0,.06);
+        margin-bottom: 20px;
+    }
+
+    .bmi-result {
+        text-align: center;
+        padding: 25px;
+    }
+
+    .bmi-number {
+        font-size: 55px;
+        font-weight: bold;
+        color: #21003d;
+        margin: 10px 0;
+    }
+
+    .status {
+        display: inline-block;
+        background: #f3e7ff;
+        color: #21003d;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-weight: bold;
+    }
+
+    .measurements {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-top: 25px;
+    }
+
+    .measurement {
+        background: #faf8fb;
+        padding: 20px;
+        border-radius: 15px;
+        text-align: center;
+    }
+
+        .measurement h3 {
+            margin: 0 0 8px 0;
+            font-size: 15px;
+        }
+
+        .measurement strong {
+            font-size: 24px;
+            color: #21003d;
+        }
+
+    .scale {
+        margin-top: 25px;
+    }
+
+    .scale-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    .scale-bar {
+        height: 18px;
+        border-radius: 20px;
+        background: linear-gradient( to right, #70a1ff 0%, #70a1ff 30%, #7bed9f 30%, #7bed9f 50%, #ffa502 50%, #ffa502 70%, #ff6348 70%, #ff6348 100% );
+    }
+
+    .advice {
+        background: #21003d;
+        color: white;
+        padding: 25px;
+        border-radius: 18px;
+        margin-top: 25px;
+    }
+
+        .advice h3 {
+            margin-top: 0;
+        }
+
+    .empty {
+        text-align: center;
+        padding: 50px 20px;
+    }
+
+    .profile-btn {
+        display: inline-block;
+        margin-top: 20px;
+        background: #21003d;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+        .profile-btn:hover {
+            background: #35005f;
+            color: white;
+        }
+
+    @@media(max-width:700px) {
+        .measurements {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="bmi-container">
+
+    <div class="header">
+        <h1>⚖️ BMI Calculator</h1>
+        <p>Check your Body Mass Index based on your profile.</p>
+    </div>
+
+    @if (ViewBag.HasProfile == false)
+    {
+        <div class="bmi-card empty">
+
+            <div style="font-size:50px;">📋</div>
+
+            <h2>Complete Your Profile</h2>
+
+            <p>
+                Please add your height and weight in your profile
+                to calculate your BMI.
+            </p>
+
+            <a asp-controller="UserProfile"
+               asp-action="Index"
+               class="profile-btn">
+                Update Profile
+            </a>
+
+        </div>
+    }
+    else
+    {
+        <div class="bmi-card">
+
+            <div class="bmi-result">
+
+                <div style="font-size:35px;">
+                    ⚖️
+                </div>
+
+                <h2>Your BMI</h2>
+
+                <div class="bmi-number">
+                    @ViewBag.BMI
+                </div>
+
+                <span class="status">
+                    @ViewBag.Status
+                </span>
+
+            </div>
+
+            <div class="measurements">
+
+                <div class="measurement">
+                    <h3>Height</h3>
+                    <strong>
+                        @ViewBag.Height
+                    </strong>
+                    <div>cm</div>
+                </div>
+
+                <div class="measurement">
+                    <h3>Weight</h3>
+                    <strong>
+                        @ViewBag.Weight
+                    </strong>
+                    <div>kg</div>
+                </div>
+
+            </div>
+
+            <div class="scale">
+
+                <h3>BMI Categories</h3>
+
+                <div class="scale-row">
+                    <span>Underweight</span>
+                    <span>Normal</span>
+                    <span>Overweight</span>
+                    <span>Obese</span>
+                </div>
+
+                <div class="scale-bar"></div>
+
+                <div class="scale-row" style="margin-top:8px;">
+                    <span>&lt;18.5</span>
+                    <span>18.5–24.9</span>
+                    <span>25–29.9</span>
+                    <span>30+</span>
+                </div>
+
+            </div>
+
+            <div class="advice">
+
+                <h3>💡 About Your BMI</h3>
+
+                <p>
+                    @ViewBag.Advice
+                </p>
+
+            </div>
+
+        </div>
+    }
+
+</div>

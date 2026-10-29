@@ -1,60 +1,169 @@
 @model FitWiseBD.Models.Food
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Add Food";
 }
 
-<h1>Create</h1>
+<div class="container mt-5">
 
-<h4>Food</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="card shadow-sm border-0 p-4">
 
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+        <h2>🍎 Add Food</h2>
+
+        <p class="text-muted">
+            Add a food item to the common nutrition database.
+        </p>
+
+        <hr />
+
+        <form asp-action="Create" method="post">
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger">
             </div>
 
-            <div class="form-group">
-                <label asp-for="Calories" class="control-label"></label>
-                <input asp-for="Calories" class="form-control" />
-                <span asp-validation-for="Calories" class="text-danger"></span>
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">
+                    Food Name
+                </label>
+
+                <input asp-for="Name"
+                       class="form-control"
+                       placeholder="e.g. Brown Rice" />
+
+                <span asp-validation-for="Name"
+                      class="text-danger">
+                </span>
             </div>
 
-            <div class="form-group">
-                <label asp-for="Protein" class="control-label"></label>
-                <input asp-for="Protein" class="form-control" />
-                <span asp-validation-for="Protein" class="text-danger"></span>
+
+            <div class="mb-3">
+                <label asp-for="MealType" class="form-label">
+                    Meal
+                </label>
+
+                <select asp-for="MealType"
+                        class="form-select">
+
+                    <option value="">Select Meal</option>
+
+                    <option value="Breakfast">
+                        🌅 Breakfast
+                    </option>
+
+                    <option value="Lunch">
+                        ☀️ Lunch
+                    </option>
+
+                    <option value="Dinner">
+                        🌙 Dinner
+                    </option>
+
+                </select>
             </div>
 
-            <div class="form-group">
-                <label asp-for="Carbs" class="control-label"></label>
-                <input asp-for="Carbs" class="form-control" />
-                <span asp-validation-for="Carbs" class="text-danger"></span>
+
+            <div class="mb-3">
+                <label asp-for="Calories" class="form-label">
+                    Calories
+                </label>
+
+                <input asp-for="Calories"
+                       class="form-control"
+                       type="number"
+                       step="0.1"
+                       min="0" />
             </div>
 
-            <div class="form-group">
-                <label asp-for="Fat" class="control-label"></label>
-                <input asp-for="Fat" class="form-control" />
-                <span asp-validation-for="Fat" class="text-danger"></span>
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+
+                    <label asp-for="Protein"
+                           class="form-label">
+                        Protein (g)
+                    </label>
+
+                    <input asp-for="Protein"
+                           class="form-control"
+                           type="number"
+                           step="0.1"
+                           min="0" />
+
+                </div>
+
+
+                <div class="col-md-4 mb-3">
+
+                    <label asp-for="Carbs"
+                           class="form-label">
+                        Carbs (g)
+                    </label>
+
+                    <input asp-for="Carbs"
+                           class="form-control"
+                           type="number"
+                           step="0.1"
+                           min="0" />
+
+                </div>
+
+
+                <div class="col-md-4 mb-3">
+
+                    <label asp-for="Fat"
+                           class="form-label">
+                        Fat (g)
+                    </label>
+
+                    <input asp-for="Fat"
+                           class="form-control"
+                           type="number"
+                           step="0.1"
+                           min="0" />
+
+                </div>
+
             </div>
 
-            <div class="form-group">
-                <label asp-for="Cost" class="control-label"></label>
-                <input asp-for="Cost" class="form-control" />
-                <span asp-validation-for="Cost" class="text-danger"></span>
+
+            <div class="mb-3">
+
+                <label asp-for="Cost"
+                       class="form-label">
+                    Cost
+                </label>
+
+                <input asp-for="Cost"
+                       class="form-control"
+                       type="number"
+                       step="0.1"
+                       min="0" />
+
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
+
+
+            <button type="submit"
+                    class="btn btn-dark">
+                Add Food
+            </button>
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary">
+                Cancel
+            </a>
+
         </form>
+
     </div>
+
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync(
+            "_ValidationScriptsPartial"
+        );
+    }
+}

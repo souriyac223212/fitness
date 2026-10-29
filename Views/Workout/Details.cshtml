@@ -1,0 +1,250 @@
+﻿@model FitWiseBD.Models.Workout
+
+@{
+    ViewData["Title"] = "Workout Details";
+}
+
+<style>
+    body {
+        background: #f7f5f8;
+        font-family: Arial, sans-serif;
+        color: #21003d;
+    }
+
+    .details-container {
+        max-width: 850px;
+        margin: 50px auto;
+        padding: 0 20px;
+    }
+
+    .details-card {
+        background: white;
+        border-radius: 22px;
+        padding: 35px;
+        box-shadow: 0 5px 20px rgba(0,0,0,.06);
+    }
+
+    .details-header {
+        background: #21003d;
+        color: white;
+        padding: 28px;
+        border-radius: 18px;
+        margin-bottom: 30px;
+    }
+
+        .details-header h1 {
+            margin: 0 0 8px;
+        }
+
+        .details-header p {
+            margin: 0;
+            color: #ddd;
+        }
+
+    .workout-icon {
+        font-size: 45px;
+        margin-bottom: 10px;
+    }
+
+    .type {
+        display: inline-block;
+        background: #f3e7ff;
+        color: #21003d;
+        padding: 6px 14px;
+        border-radius: 15px;
+        font-size: 13px;
+        font-weight: bold;
+        margin-top: 10px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+        margin-top: 25px;
+    }
+
+    .info-box {
+        background: #faf8fc;
+        padding: 18px;
+        border-radius: 14px;
+        border: 1px solid #eee;
+    }
+
+        .info-box strong {
+            display: block;
+            font-size: 13px;
+            color: #777;
+            margin-bottom: 6px;
+        }
+
+        .info-box span {
+            font-size: 18px;
+            font-weight: bold;
+            color: #21003d;
+        }
+
+    .description {
+        margin-top: 25px;
+        padding: 20px;
+        background: #faf8fc;
+        border-radius: 14px;
+    }
+
+        .description strong {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+    .actions {
+        margin-top: 30px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-custom {
+        padding: 10px 18px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .edit-btn {
+        background: #fff0d9;
+        color: #8a5700;
+    }
+
+    .back-btn {
+        background: #21003d;
+        color: white;
+    }
+
+    .delete-btn {
+        background: #ffe2e2;
+        color: #a30000;
+    }
+
+    @@media(max-width:600px) {
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .details-card {
+            padding: 20px;
+        }
+
+        .actions {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="details-container">
+
+    <div class="details-card">
+
+        <div class="details-header">
+
+            <div class="workout-icon">
+                @if (Model.Type == "Indoor")
+                {
+                    @:🏠
+                }
+                else
+                {
+                    @:🌳
+                }
+            </div>
+
+            <h1>@Model.Name</h1>
+
+            <p>Workout details and information</p>
+
+            <span class="type">
+                @Model.Type
+            </span>
+
+        </div>
+
+
+        <div class="info-grid">
+
+            @if (Model.Sets.HasValue)
+            {
+                <div class="info-box">
+                    <strong>SETS</strong>
+                    <span>@Model.Sets</span>
+                </div>
+            }
+
+            @if (Model.Reps.HasValue)
+            {
+                <div class="info-box">
+                    <strong>REPS</strong>
+                    <span>@Model.Reps</span>
+                </div>
+            }
+
+            @if (Model.DurationMinutes.HasValue)
+            {
+                <div class="info-box">
+                    <strong>DURATION</strong>
+                    <span>@Model.DurationMinutes minutes</span>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.Difficulty))
+            {
+                <div class="info-box">
+                    <strong>DIFFICULTY</strong>
+                    <span>@Model.Difficulty</span>
+                </div>
+            }
+
+            <div class="info-box">
+                <strong>CALORIES BURNED</strong>
+                <span>@Model.CaloriesBurned kcal</span>
+            </div>
+
+        </div>
+
+
+        @if (!string.IsNullOrWhiteSpace(Model.Description))
+        {
+            <div class="description">
+
+                <strong>📝 Description</strong>
+
+                <p>
+                    @Model.Description
+                </p>
+
+            </div>
+        }
+
+
+        <div class="actions">
+
+            <a asp-action="Edit"
+               asp-route-id="@Model.Id"
+               class="btn-custom edit-btn">
+                ✏️ Edit
+            </a>
+
+            <a asp-action="Delete"
+               asp-route-id="@Model.Id"
+               class="btn-custom delete-btn">
+                🗑 Delete
+            </a>
+
+            <a asp-action="Index"
+               class="btn-custom back-btn">
+                ← Back to Workouts
+            </a>
+
+        </div>
+
+    </div>
+
+</div>

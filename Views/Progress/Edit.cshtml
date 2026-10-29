@@ -1,0 +1,378 @@
+﻿@model FitWiseBD.Models.ProgressLog
+
+@{
+    ViewData["Title"] = "Edit Progress";
+}
+
+<style>
+    .progress-edit-page {
+        max-width: 720px;
+        margin: 35px auto;
+        padding: 0 20px;
+    }
+
+    .edit-header {
+        margin-bottom: 22px;
+        animation: fadeDown .5s ease both;
+    }
+
+        .edit-header h1 {
+            margin: 0;
+            color: #21003d;
+            font-size: 27px;
+            font-weight: 700;
+        }
+
+        .edit-header p {
+            margin-top: 6px;
+            color: #777;
+            font-size: 12px;
+        }
+
+    .edit-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 28px;
+        box-shadow: 0 8px 28px rgba(0,0,0,.07);
+        animation: fadeUp .6s ease both;
+    }
+
+    .edit-intro {
+        background: #21003d;
+        color: white;
+        border-radius: 15px;
+        padding: 18px 20px;
+        margin-bottom: 22px;
+    }
+
+        .edit-intro h3 {
+            margin: 0 0 5px;
+            font-size: 17px;
+        }
+
+        .edit-intro p {
+            margin: 0;
+            color: #ddd;
+            font-size: 11px;
+        }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-label {
+        color: #21003d;
+        font-size: 11px;
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
+
+    .form-control {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 11px 12px;
+        font-size: 12px;
+        outline: none;
+        transition: .25s ease;
+        background: #fff;
+    }
+
+        .form-control:focus {
+            border-color: #21003d;
+            box-shadow: 0 0 0 3px rgba(33,0,61,.08);
+        }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 95px;
+    }
+
+    .input-hint {
+        margin-top: 5px;
+        font-size: 9px;
+        color: #999;
+    }
+
+    .text-danger {
+        font-size: 10px;
+        margin-top: 5px;
+    }
+
+    .validation-summary {
+        color: #b00020;
+        font-size: 11px;
+        margin-bottom: 15px;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+
+    .back-btn {
+        text-decoration: none;
+        color: #666;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+        .back-btn:hover {
+            color: #21003d;
+        }
+
+    .update-btn {
+        border: none;
+        background: #21003d;
+        color: white;
+        padding: 11px 22px;
+        border-radius: 22px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: .25s ease;
+    }
+
+        .update-btn:hover {
+            background: #35005f;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 18px rgba(33,0,61,.18);
+        }
+
+    @@keyframes fadeDown {
+        from {
+            opacity: 0;
+            transform: translateY(-12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@media (max-width: 600px) {
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .full-width {
+            grid-column: auto;
+        }
+
+        .edit-card {
+            padding: 20px;
+        }
+    }
+</style>
+
+
+<div class="progress-edit-page">
+
+    <div class="edit-header">
+
+        <h1>✏️ Edit Progress</h1>
+
+        <p>
+            Update your fitness progress information.
+        </p>
+
+    </div>
+
+
+    <div class="edit-card">
+
+        <div class="edit-intro">
+
+            <h3>🎯 Update Your Fitness Journey</h3>
+
+            <p>
+                Modify your weight, workout activity or notes.
+            </p>
+
+        </div>
+
+
+        <form asp-action="Edit"
+              asp-route-id="@Model.Id"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   asp-for="Id" />
+
+
+            <div asp-validation-summary="ModelOnly"
+                 class="validation-summary">
+            </div>
+
+
+            <div class="form-grid">
+
+
+                <!-- DATE -->
+
+                <div class="form-group">
+
+                    <label asp-for="LogDate"
+                           class="form-label">
+                        📅 Progress Date
+                    </label>
+
+                    <input asp-for="LogDate"
+                           type="date"
+                           class="form-control" />
+
+                    <span asp-validation-for="LogDate"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- WEIGHT -->
+
+                <div class="form-group">
+
+                    <label asp-for="Weight"
+                           class="form-label">
+                        ⚖️ Current Weight (kg)
+                    </label>
+
+                    <input asp-for="Weight"
+                           type="number"
+                           step="0.1"
+                           min="20"
+                           max="300"
+                           class="form-control" />
+
+                    <span asp-validation-for="Weight"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- WORKOUT SESSIONS -->
+
+                <div class="form-group">
+
+                    <label asp-for="WorkoutSessions"
+                           class="form-label">
+                        🏋️ Workout Sessions
+                    </label>
+
+                    <input asp-for="WorkoutSessions"
+                           type="number"
+                           min="0"
+                           max="50"
+                           class="form-control" />
+
+                    <span asp-validation-for="WorkoutSessions"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- WORKOUT MINUTES -->
+
+                <div class="form-group">
+
+                    <label asp-for="WorkoutMinutes"
+                           class="form-label">
+                        ⏱️ Workout Time (minutes)
+                    </label>
+
+                    <input asp-for="WorkoutMinutes"
+                           type="number"
+                           min="0"
+                           max="1440"
+                           class="form-control" />
+
+                    <span asp-validation-for="WorkoutMinutes"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- NOTES -->
+
+                <div class="form-group full-width">
+
+                    <label asp-for="Notes"
+                           class="form-label">
+                        📝 Notes
+                    </label>
+
+                    <textarea asp-for="Notes"
+                              class="form-control"></textarea>
+
+                    <span asp-validation-for="Notes"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-actions">
+
+                <a asp-action="Index"
+                   class="back-btn">
+                    ← Back to Progress
+                </a>
+
+                <button type="submit"
+                        class="update-btn">
+                    Update Progress →
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+}

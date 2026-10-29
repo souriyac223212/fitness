@@ -1,0 +1,126 @@
+﻿@model FitWiseBD.Models.Workout
+
+@{
+    ViewData["Title"] = "Edit Workout";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="card shadow-sm mx-auto" style="max-width: 750px;">
+        <div class="card-header text-white"
+             style="background: #21003d;">
+            <h3 class="mb-0">Edit Workout</h3>
+        </div>
+
+        <div class="card-body p-4">
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" asp-for="Id" />
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label">
+                        Workout Name
+                    </label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Type" class="form-label">
+                        Workout Type
+                    </label>
+                    <input asp-for="Type" class="form-control" />
+                    <span asp-validation-for="Type"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Difficulty" class="form-label">
+                        Difficulty
+                    </label>
+                    <select asp-for="Difficulty" class="form-select">
+                        <option value="">Select Difficulty</option>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                    </select>
+                    <span asp-validation-for="Difficulty"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Sets" class="form-label"></label>
+                        <input asp-for="Sets"
+                               type="number"
+                               class="form-control" />
+                        <span asp-validation-for="Sets"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Reps" class="form-label"></label>
+                        <input asp-for="Reps"
+                               type="number"
+                               class="form-control" />
+                        <span asp-validation-for="Reps"
+                              class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DurationMinutes"
+                           class="form-label">
+                        Duration (Minutes)
+                    </label>
+                    <input asp-for="DurationMinutes"
+                           type="number"
+                           class="form-control" />
+                    <span asp-validation-for="DurationMinutes"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CaloriesBurned"
+                           class="form-label">
+                        Calories Burned
+                    </label>
+                    <input asp-for="CaloriesBurned"
+                           type="number"
+                           class="form-control" />
+                    <span asp-validation-for="CaloriesBurned"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Description"
+                           class="form-label"></label>
+                    <textarea asp-for="Description"
+                              class="form-control"
+                              rows="4"></textarea>
+                    <span asp-validation-for="Description"
+                          class="text-danger"></span>
+                </div>
+
+                <button type="submit"
+                        class="btn text-white"
+                        style="background: #7027b5;">
+                    Save Changes
+                </button>
+
+                <a asp-action="Index"
+                   class="btn btn-outline-secondary ms-2">
+                    Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

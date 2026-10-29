@@ -1,0 +1,771 @@
+﻿@model IEnumerable<FitWiseBD.Models.NutritionLog>
+
+@{
+    ViewData["Title"] = "Nutrition";
+
+    var breakfast = Model.Where(x => x.MealType == "Breakfast").ToList();
+    var lunch = Model.Where(x => x.MealType == "Lunch").ToList();
+    var dinner = Model.Where(x => x.MealType == "Dinner").ToList();
+    var snacks = Model.Where(x => x.MealType == "Snack").ToList();
+}
+
+<style>
+    body {
+        background: #f7f5f8;
+        font-family: Arial, sans-serif;
+        color: #21003d;
+    }
+
+    .nutrition-container {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 0 20px 50px;
+    }
+
+    /* HEADER */
+    .header {
+        background: linear-gradient(135deg, #21003d, #35005f);
+        color: white;
+        padding: 30px;
+        border-radius: 22px;
+        margin-bottom: 25px;
+        box-shadow: 0 8px 25px rgba(33, 0, 61, 0.12);
+    }
+
+        .header h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+        }
+
+        .header p {
+            margin: 0;
+            color: #ddd;
+            font-size: 14px;
+        }
+
+    /* TOP BAR */
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 22px;
+    }
+
+        .top-bar h2 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 500;
+        }
+
+    .top-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .add-btn,
+    .manage-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 11px 18px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 13px;
+        transition: 0.2s ease;
+    }
+
+    .add-btn {
+        background: #21003d;
+        color: white;
+    }
+
+        .add-btn:hover {
+            background: #35005f;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+    .manage-btn {
+        background: white;
+        color: #21003d;
+        border: 1px solid #ddd;
+    }
+
+        .manage-btn:hover {
+            background: #f1eafa;
+            color: #21003d;
+            transform: translateY(-1px);
+        }
+
+    /* SUMMARY */
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-bottom: 28px;
+    }
+
+    .summary-card {
+        background: white;
+        padding: 22px;
+        border-radius: 18px;
+        box-shadow: 0 5px 20px rgba(0,0,0,.06);
+        border: 1px solid #eee;
+    }
+
+        .summary-card h3 {
+            font-size: 13px;
+            font-weight: normal;
+            margin: 0 0 10px;
+            color: #555;
+        }
+
+    .summary-value {
+        font-size: 25px;
+        font-weight: bold;
+        color: #21003d;
+    }
+
+    /* FOOD DATABASE CARD */
+    .food-database {
+        background: white;
+        border-radius: 18px;
+        padding: 22px;
+        margin-bottom: 28px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid #eee;
+        box-shadow: 0 5px 20px rgba(0,0,0,.05);
+    }
+
+    .food-database-left {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .food-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: #f1eafa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 23px;
+    }
+
+    .food-database h3 {
+        margin: 0 0 5px;
+        font-size: 17px;
+        font-weight: 600;
+    }
+
+    .food-database p {
+        margin: 0;
+        font-size: 13px;
+        color: #777;
+    }
+
+    .database-btn {
+        background: #21003d;
+        color: white;
+        padding: 10px 17px;
+        border-radius: 22px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: bold;
+        white-space: nowrap;
+        transition: .2s ease;
+    }
+
+        .database-btn:hover {
+            background: #35005f;
+            color: white;
+        }
+
+    /* MEAL CARD */
+    .meal-card {
+        background: white;
+        padding: 22px;
+        border-radius: 18px;
+        margin-bottom: 20px;
+        box-shadow: 0 5px 20px rgba(0,0,0,.06);
+        border: 1px solid #eee;
+    }
+
+    .meal-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 12px;
+        margin-bottom: 10px;
+    }
+
+        .meal-title h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .meal-title strong {
+            font-size: 13px;
+            color: #21003d;
+        }
+
+    /* FOOD ROW */
+    .food-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr 80px;
+        gap: 10px;
+        padding: 13px 0;
+        border-bottom: 1px solid #eee;
+        align-items: center;
+        font-size: 13px;
+    }
+
+        .food-row:last-child {
+            border-bottom: none;
+        }
+
+    .food-name {
+        font-weight: bold;
+        color: #21003d;
+    }
+
+    .small {
+        font-size: 12px;
+        color: #777;
+        margin-top: 3px;
+    }
+
+    .delete-btn {
+        background: #ffe2e2;
+        color: #a30000;
+        border: none;
+        padding: 7px 10px;
+        border-radius: 7px;
+        cursor: pointer;
+        font-size: 11px;
+    }
+
+        .delete-btn:hover {
+            background: #ffd0d0;
+        }
+
+    .empty {
+        padding: 28px;
+        text-align: center;
+        color: #888;
+        font-size: 13px;
+    }
+
+    /* SUCCESS */
+    .success {
+        background: #e6f8ec;
+        color: #176b35;
+        padding: 12px 18px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 13px;
+    }
+
+    /* RESPONSIVE */
+    @@media (max-width: 800px) {
+
+        .summary-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .top-bar {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .top-actions {
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .food-database {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .food-row {
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+    }
+
+    @@media (max-width: 500px) {
+
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .top-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .add-btn,
+        .manage-btn {
+            justify-content: center;
+        }
+    }
+</style>
+
+
+<div class="nutrition-container">
+
+    <!-- HEADER -->
+    <div class="header">
+
+        <h1>🍎 My Nutrition</h1>
+
+        <p>
+            Track your daily food intake, meals and nutrition progress.
+        </p>
+
+    </div>
+
+
+    <!-- SUCCESS MESSAGE -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="success">
+            @TempData["Success"]
+        </div>
+    }
+
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+
+        <h2>Today's Nutrition</h2>
+
+        <div class="top-actions">
+
+            <!-- Add today's meal -->
+            <a asp-action="Add" class="add-btn">
+                ＋ Add Food
+            </a>
+
+            <!-- Open Food CRUD -->
+            <a asp-controller="Foods"
+               asp-action="Index"
+               class="manage-btn">
+                🍎 Manage Foods
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- SUMMARY -->
+    <div class="summary-grid">
+
+        <div class="summary-card">
+
+            <h3>🔥 Calories</h3>
+
+            <div class="summary-value">
+                @Math.Round((double)ViewBag.TotalCalories) kcal
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <h3>🥩 Protein</h3>
+
+            <div class="summary-value">
+                @Math.Round((double)ViewBag.TotalProtein, 1) g
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <h3>🍚 Carbs</h3>
+
+            <div class="summary-value">
+                @Math.Round((double)ViewBag.TotalCarbs, 1) g
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <h3>🥑 Fat</h3>
+
+            <div class="summary-value">
+                @Math.Round((double)ViewBag.TotalFat, 1) g
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- FOOD DATABASE -->
+    <div class="food-database">
+
+        <div class="food-database-left">
+
+            <div class="food-icon">
+                🍎
+            </div>
+
+            <div>
+
+                <h3>Food Database</h3>
+
+                <p>
+                    Manage foods, calories, protein, carbs, fat and cost.
+                </p>
+
+            </div>
+
+        </div>
+
+        <a asp-controller="Foods"
+           asp-action="Index"
+           class="database-btn">
+            Manage Food Database →
+        </a>
+
+    </div>
+
+
+    <!-- BREAKFAST -->
+    <div class="meal-card">
+
+        <div class="meal-title">
+
+            <h3>🌅 Breakfast</h3>
+
+            <strong>
+                @Math.Round((double)ViewBag.BreakfastCalories) kcal
+            </strong>
+
+        </div>
+
+
+        @if (!breakfast.Any())
+        {
+            <div class="empty">
+                No breakfast added yet.
+            </div>
+        }
+        else
+        {
+            foreach (var item in breakfast)
+            {
+                <div class="food-row">
+
+                    <div>
+
+                        <div class="food-name">
+                            @item.Food?.Name
+                        </div>
+
+                        <div class="small">
+                            Quantity: @item.Quantity
+                        </div>
+
+                    </div>
+
+                    <div>
+                        @Math.Round(
+                            (item.Food?.Calories ?? 0) * item.Quantity
+                        ) kcal
+                    </div>
+
+                    <div>
+                        Protein:
+                        @Math.Round(
+                            (item.Food?.Protein ?? 0) * item.Quantity,
+                            1
+                        )g
+                    </div>
+
+                    <div>
+                        Carbs:
+                        @Math.Round(
+                            (item.Food?.Carbs ?? 0) * item.Quantity,
+                            1
+                        )g
+                    </div>
+
+                    <form asp-action="Delete" method="post">
+
+                        <input type="hidden"
+                               name="id"
+                               value="@item.Id" />
+
+                        <button type="submit"
+                                class="delete-btn">
+                            Delete
+                        </button>
+
+                    </form>
+
+                </div>
+            }
+        }
+
+    </div>
+
+
+    <!-- LUNCH -->
+    <div class="meal-card">
+
+        <div class="meal-title">
+
+            <h3>🍱 Lunch</h3>
+
+            <strong>
+                @Math.Round((double)ViewBag.LunchCalories) kcal
+            </strong>
+
+        </div>
+
+
+        @if (!lunch.Any())
+        {
+            <div class="empty">
+                No lunch added yet.
+            </div>
+        }
+        else
+        {
+            foreach (var item in lunch)
+            {
+                <div class="food-row">
+
+                    <div>
+
+                        <div class="food-name">
+                            @item.Food?.Name
+                        </div>
+
+                        <div class="small">
+                            Quantity: @item.Quantity
+                        </div>
+
+                    </div>
+
+                    <div>
+                        @Math.Round(
+                            (item.Food?.Calories ?? 0) * item.Quantity
+                        ) kcal
+                    </div>
+
+                    <div>
+                        Protein:
+                        @Math.Round(
+                            (item.Food?.Protein ?? 0) * item.Quantity,
+                            1
+                        )g
+                    </div>
+
+                    <div>
+                        Carbs:
+                        @Math.Round(
+                            (item.Food?.Carbs ?? 0) * item.Quantity,
+                            1
+                        )g
+                    </div>
+
+                    <form asp-action="Delete" method="post">
+
+                        <input type="hidden"
+                               name="id"
+                               value="@item.Id" />
+
+                        <button type="submit"
+                                class="delete-btn">
+                            Delete
+                        </button>
+
+                    </form>
+
+                </div>
+            }
+        }
+
+    </div>
+
+
+    <!-- DINNER -->
+    <div class="meal-card">
+
+        <div class="meal-title">
+
+            <h3>🌙 Dinner</h3>
+
+            <strong>
+                @Math.Round((double)ViewBag.DinnerCalories) kcal
+            </strong>
+
+        </div>
+
+
+        @if (!dinner.Any())
+        {
+            <div class="empty">
+                No dinner added yet.
+            </div>
+        }
+        else
+        {
+            foreach (var item in dinner)
+            {
+                <div class="food-row">
+
+                    <div>
+
+                        <div class="food-name">
+                            @item.Food?.Name
+                        </div>
+
+                        <div class="small">
+                            Quantity: @item.Quantity
+                        </div>
+
+                    </div>
+
+                    <div>
+                        @Math.Round(
+                            (item.Food?.Calories ?? 0) * item.Quantity
+                        ) kcal
+                    </div>
+
+                    <div>
+                        Protein:
+                        @Math.Round(
+                            (item.Food?.Protein ?? 0) * item.Quantity,
+                            1
+                        )g
+                    </div>
+
+                    <div>
+                        Carbs:
+                        @Math.Round(
+                            (item.Food?.Carbs ?? 0) * item.Quantity,
+                            1
+                        )g
+                    </div>
+
+                    <form asp-action="Delete" method="post">
+
+                        <input type="hidden"
+                               name="id"
+                               value="@item.Id" />
+
+                        <button type="submit"
+                                class="delete-btn">
+                            Delete
+                        </button>
+
+                    </form>
+
+                </div>
+            }
+        }
+
+    </div>
+
+
+    <!-- SNACKS -->
+    <div class="meal-card">
+
+        <div class="meal-title">
+
+            <h3>🍌 Snacks</h3>
+
+            <strong>
+                @Math.Round((double)ViewBag.SnackCalories) kcal
+            </strong>
+
+        </div>
+
+
+        @if (!snacks.Any())
+        {
+            <div class="empty">
+                No snacks added yet.
+            </div>
+        }
+        else
+        {
+            foreach (var item in snacks)
+            {
+                <div class="food-row">
+
+                    <div>
+
+                        <div class="food-name">
+                            @item.Food?.Name
+                        </div>
+
+                        <div class="small">
+                            Quantity: @item.Quantity
+                        </div>
+
+                    </div>
+
+                    <div>
+                        @Math.Round(
+                            (item.Food?.Calories ?? 0) * item.Quantity
+                        ) kcal
+                    </div>
+
+                    <div>
+                        Protein:
+                        @Math.Round(
+                            (item.Food?.Protein ?? 0) * item.Quantity,
+                            1
+                        )g
+                    </div>
+
+                    <div>
+                        Carbs:
+                        @Math.Round(
+                            (item.Food?.Carbs ?? 0) * item.Quantity,
+                            1
+                        )g
+                    </div>
+
+                    <form asp-action="Delete" method="post">
+
+                        <input type="hidden"
+                               name="id"
+                               value="@item.Id" />
+
+                        <button type="submit"
+                                class="delete-btn">
+                            Delete
+                        </button>
+
+                    </form>
+
+                </div>
+            }
+        }
+
+    </div>
+
+</div>

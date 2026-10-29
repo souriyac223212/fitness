@@ -1,0 +1,1287 @@
+﻿@using System.Linq
+@using System.Collections.Generic
+
+@model IEnumerable<FitWiseBD.Models.ProgressLog>
+
+@{
+    ViewData["Title"] = "My Fitness Journey";
+
+    var entries = Model?
+        .OrderBy(x => x.LogDate)
+        .ToList()
+        ?? new List<FitWiseBD.Models.ProgressLog>();
+
+    // =========================
+    // USER GOAL INFORMATION
+    // =========================
+
+    var fitnessGoal = ViewBag.FitnessGoal as string;
+
+    if (string.IsNullOrWhiteSpace(fitnessGoal))
+    {
+        fitnessGoal = "Weight Loss";
+    }
+
+
+    // =========================
+    // PROFILE WEIGHT
+    // =========================
+
+    double profileWeight = 0;
+
+    if (ViewBag.CurrentWeight != null)
+    {
+        try
+        {
+            profileWeight = Convert.ToDouble(ViewBag.CurrentWeight);
+        }
+        catch
+        {
+            profileWeight = 0;
+        }
+    }
+
+
+    // =========================
+    // TARGET WEIGHT
+    // =========================
+
+   // =========================
+// PROFILE INFORMATION
+// =========================
+
+var profile = ViewBag.Profile as FitWiseBD.Models.UserProfile;
+
+double targetWeight = profile?.TargetWeight ?? 0;
+
+int plannedMonths = profile?.GoalDurationMonths ?? 0;
+    // =========================
+    // PLANNED MONTHS
+    // =========================
+
+    // =========================
+    // START WEIGHT
+    // =========================
+
+    double startWeight = profileWeight;
+
+    if (entries.Any())
+    {
+        startWeight = entries.First().Weight.GetValueOrDefault();
+    }
+
+
+    // =========================
+    // CURRENT WEIGHT
+    // =========================
+
+    double currentWeight = profileWeight;
+
+    if (entries.Any())
+    {
+        currentWeight = entries.Last().Weight.GetValueOrDefault();
+    }
+
+
+    // =========================
+    // TOTAL WORKOUTS
+    // =========================
+
+    int totalWorkouts = entries.Sum(x => x.WorkoutSessions);
+
+
+    // =========================
+    // TOTAL ACTIVE MINUTES
+    // =========================
+
+    int totalMinutes = entries.Sum(x => x.WorkoutMinutes);
+
+    int totalHours = totalMinutes / 60;
+
+    int remainingMinutes = totalMinutes % 60;
+
+
+    // =========================
+    // WEIGHT CHANGE
+    // =========================
+
+    double weightChange = startWeight - currentWeight;
+
+
+    // =========================
+    // GOAL COMPLETION
+    // =========================
+
+   double goalPercent = 0;
+
+if (targetWeight > 0 && startWeight > 0)
+{
+    double totalChange = Math.Abs(startWeight - targetWeight);
+
+    if (totalChange == 0)
+    {
+        goalPercent = currentWeight == targetWeight ? 100 : 0;
+    }
+    else
+    {
+        double achievedChange;
+
+        if (startWeight > targetWeight)
+        {
+            // Weight Loss
+            achievedChange = startWeight - currentWeight;
+        }
+        else
+        {
+            // Weight Gain
+            achievedChange = currentWeight - startWeight;
+        }
+
+        goalPercent = Math.Clamp(
+            achievedChange / totalChange * 100,
+            0,
+            100
+        );
+    }
+}
+    // =========================
+    // PROGRESS ENTRIES
+    // =========================
+
+    var latestEntries = entries
+        .OrderByDescending(x => x.LogDate)
+        .Take(8)
+        .ToList();
+}
+
+
+<style>
+
+    /* =========================
+           MAIN PAGE
+           ========================= */
+
+    .progress-page {
+        max-width: 1050px;
+        margin: 0 auto;
+        padding: 30px 20px 60px;
+    }
+
+
+    /* =========================
+           HEADER
+           ========================= */
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        animation: fadeDown .5s ease;
+    }
+
+        .progress-header h1 {
+            margin: 0;
+            color: #21003d;
+            font-size: 27px;
+            font-weight: 700;
+        }
+
+        .progress-header p {
+            margin: 5px 0 0;
+            color: #777;
+            font-size: 11px;
+        }
+
+
+    /* =========================
+           LOG BUTTON
+           ========================= */
+
+    .log-progress-btn {
+        display: inline-block;
+        text-decoration: none;
+        background: #21003d;
+        color: white;
+        padding: 11px 18px;
+        border-radius: 22px;
+        font-size: 11px;
+        font-weight: 600;
+        transition: .25s ease;
+    }
+
+        .log-progress-btn:hover {
+            background: #35005f;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(33,0,61,.18);
+        }
+
+
+    /* =========================
+           GOAL BANNER
+           ========================= */
+
+    .goal-banner {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient( 135deg, #21003d, #35005f );
+        color: white;
+        border-radius: 18px;
+        padding: 25px;
+        margin-bottom: 18px;
+        animation: fadeUp .6s ease;
+    }
+
+        .goal-banner:after {
+            content: "";
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            right: -40px;
+            top: -65px;
+            border-radius: 50%;
+            background: rgba(255,160,140,.18);
+        }
+
+    .goal-label {
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: .7px;
+        opacity: .7;
+    }
+
+    .goal-banner h2 {
+        margin: 7px 0 5px;
+        font-size: 21px;
+    }
+
+    .goal-banner p {
+        margin: 0;
+        color: #ddd;
+        font-size: 10px;
+    }
+
+
+    /* =========================
+           STAT CARDS
+           ========================= */
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 18px;
+        box-shadow: 0 5px 20px rgba(0,0,0,.06);
+        animation: fadeUp .7s ease;
+    }
+
+    .stat-icon {
+        font-size: 17px;
+        margin-bottom: 8px;
+    }
+
+    .stat-label {
+        color: #999;
+        font-size: 9px;
+    }
+
+    .stat-value {
+        color: #21003d;
+        font-size: 17px;
+        font-weight: 700;
+        margin-top: 4px;
+    }
+
+
+    /* =========================
+           COMMON CARD
+           ========================= */
+
+    .progress-card {
+        background: white;
+        border-radius: 17px;
+        padding: 22px;
+        margin-bottom: 18px;
+        box-shadow: 0 5px 20px rgba(0,0,0,.06);
+        animation: fadeUp .8s ease;
+    }
+
+    .card-title {
+        color: #21003d;
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 18px;
+    }
+
+
+    /* =========================
+           GOAL PROGRESS
+           ========================= */
+
+    .goal-info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        color: #666;
+        font-size: 10px;
+    }
+
+        .goal-info-row strong {
+            color: #21003d;
+        }
+
+
+    .progress-track {
+        width: 100%;
+        height: 11px;
+        background: #eee;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        width: @goalPercent.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) %;
+        background: linear-gradient( 90deg, #21003d, #7132a0 );
+        border-radius: 20px;
+        animation: growProgress 1.3s ease;
+    }
+
+    .progress-percent {
+        text-align: right;
+        color: #21003d;
+        font-size: 9px;
+        font-weight: 700;
+        margin-top: 7px;
+    }
+
+
+    /* =========================
+           JOURNEY SUMMARY
+           ========================= */
+
+    .journey-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 15px;
+    }
+
+    .journey-item {
+        background: #f8f5fa;
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+    }
+
+    .journey-number {
+        color: #21003d;
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .journey-label {
+        color: #777;
+        font-size: 9px;
+        margin-top: 4px;
+    }
+
+
+    /* =========================
+           WEIGHT TREND
+           ========================= */
+
+    .weight-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f8f5fa;
+        border-radius: 13px;
+        padding: 15px;
+        margin-bottom: 18px;
+    }
+
+    .weight-summary-label {
+        color: #777;
+        font-size: 9px;
+    }
+
+    .weight-summary-value {
+        color: #21003d;
+        font-size: 16px;
+        font-weight: 700;
+        margin-top: 4px;
+    }
+
+
+    /* =========================
+           SIMPLE WEIGHT BARS
+           ========================= */
+
+    .weight-bars {
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+        height: 180px;
+        padding: 15px 10px 0;
+        border-bottom: 1px solid #ddd;
+        overflow-x: auto;
+    }
+
+    .weight-column {
+        min-width: 55px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    .weight-bar {
+        width: 30px;
+        min-height: 8px;
+        background: linear-gradient( 180deg, #7132a0, #21003d );
+        border-radius: 8px 8px 0 0;
+        transition: .4s ease;
+        animation: barGrow .8s ease;
+    }
+
+        .weight-bar:hover {
+            transform: scaleY(1.05);
+            opacity: .85;
+        }
+
+    .weight-value {
+        color: #21003d;
+        font-size: 8px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .weight-date {
+        color: #888;
+        font-size: 8px;
+        margin-top: 7px;
+    }
+
+
+    /* =========================
+           EMPTY CHART
+           ========================= */
+
+    .empty-chart {
+        height: 180px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        color: #777;
+    }
+
+    .empty-chart-icon {
+        font-size: 38px;
+        margin-bottom: 10px;
+    }
+
+    .empty-chart strong {
+        color: #21003d;
+        font-size: 13px;
+    }
+
+    .empty-chart span {
+        font-size: 10px;
+        margin-top: 5px;
+    }
+
+
+    /* =========================
+           HISTORY
+           ========================= */
+
+    .history-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+    .history-date {
+        color: #21003d;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .history-details {
+        color: #888;
+        font-size: 9px;
+        margin-top: 5px;
+    }
+
+    .history-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .history-weight {
+        color: #21003d;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+
+    /* =========================
+           EDIT DELETE
+           ========================= */
+
+    .history-actions {
+        display: flex;
+        gap: 6px;
+    }
+
+    .edit-btn,
+    .delete-btn {
+        text-decoration: none;
+        padding: 6px 10px;
+        border-radius: 15px;
+        font-size: 9px;
+        font-weight: 600;
+        transition: .2s ease;
+    }
+
+    .edit-btn {
+        color: #21003d;
+        background: #f0e9f7;
+    }
+
+    .delete-btn {
+        color: #c62828;
+        background: #fff0f0;
+    }
+
+        .edit-btn:hover,
+        .delete-btn:hover {
+            transform: translateY(-1px);
+        }
+
+
+    /* =========================
+           EMPTY HISTORY
+           ========================= */
+
+    .empty-history {
+        text-align: center;
+        padding: 30px 10px;
+        color: #777;
+    }
+
+    .empty-history-icon {
+        font-size: 34px;
+        margin-bottom: 8px;
+    }
+
+    .empty-history strong {
+        display: block;
+        color: #21003d;
+        font-size: 13px;
+        margin-bottom: 5px;
+    }
+
+    .empty-history span {
+        font-size: 10px;
+    }
+
+
+    /* =========================
+           ANIMATIONS
+           ========================= */
+
+    @@keyframes fadeDown {
+
+        from {
+            opacity: 0;
+            transform: translateY(-12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+
+    @@keyframes fadeUp {
+
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+
+    @@keyframes growProgress {
+
+        from {
+            width: 0;
+        }
+    }
+
+
+    @@keyframes barGrow {
+
+        from {
+            transform: scaleY(0);
+            transform-origin: bottom;
+        }
+
+        to {
+            transform: scaleY(1);
+            transform-origin: bottom;
+        }
+    }
+
+
+    /* =========================
+           RESPONSIVE
+           ========================= */
+
+    @@media (max-width: 750px) {
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .journey-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .progress-header {
+            align-items: flex-start;
+            gap: 15px;
+        }
+    }
+
+
+    @@media (max-width: 500px) {
+
+        .progress-page {
+            padding: 20px 12px 40px;
+        }
+
+        .progress-header {
+            flex-direction: column;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .history-item {
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .history-right {
+            flex-direction: column;
+            align-items: flex-end;
+        }
+    }
+
+</style>
+
+
+<div class="progress-page">
+
+
+    <!-- =========================
+         HEADER
+         ========================= -->
+
+    <div class="progress-header">
+
+        <div>
+
+            <h1>
+                🎯 My Fitness Journey
+            </h1>
+
+            <p>
+                Track your progress and stay focused on your goal.
+            </p>
+
+        </div>
+
+
+        <!-- ONLY ONE BUTTON -->
+
+        <a asp-action="Create"
+           class="log-progress-btn">
+
+            + Log Progress
+
+        </a>
+
+    </div>
+
+
+
+    <!-- =========================
+         GOAL BANNER
+         ========================= -->
+
+    <div class="goal-banner">
+
+        <div class="goal-label">
+            Your Goal
+        </div>
+
+        <h2>
+            @fitnessGoal
+        </h2>
+
+        <p>
+
+            @if (plannedMonths > 0)
+            {
+                <span>
+                    Your planned journey: @plannedMonths months
+                </span>
+            }
+            else
+            {
+                <span>
+                    Track your long-term fitness journey
+                </span>
+            }
+
+        </p>
+
+    </div>
+
+
+
+    <!-- =========================
+         STATISTICS
+         ========================= -->
+
+    <div class="stats-grid">
+
+
+        <!-- CURRENT WEIGHT -->
+@{
+    
+    double profileTargetWeight = profile?.TargetWeight ?? 0;
+    int goalDuration = profile?.GoalDurationMonths ?? 0;
+}
+
+<!-- CURRENT WEIGHT -->
+<div class="stat-card">
+    <div class="stat-icon">⚖️</div>
+    <div class="stat-label">Current Weight</div>
+
+    <div class="stat-value">
+        @if (currentWeight > 0)
+        {
+            @currentWeight.ToString("0.0")
+            <span>kg</span>
+        }
+        else
+        {
+            <span>Not Set</span>
+        }
+    </div>
+</div>
+
+<!-- TARGET WEIGHT -->
+<div class="stat-card">
+    <div class="stat-icon">🎯</div>
+    <div class="stat-label">Target Weight</div>
+
+    <div class="stat-value">
+        @if (profileTargetWeight > 0)
+        {
+            @profileTargetWeight.ToString("0.0")
+            <span>kg</span>
+        }
+        else
+        {
+            <span>Not Set</span>
+        }
+    </div>
+</div>
+
+<!-- GOAL DURATION -->
+<div class="stat-card">
+    <div class="stat-icon">📅</div>
+    <div class="stat-label">Goal Duration</div>
+
+    <div class="stat-value">
+        @if (goalDuration > 0)
+        {
+            @goalDuration
+            <span>Months</span>
+        }
+        else
+        {
+            <span>Not Set</span>
+        }
+    </div>
+</div>
+
+        <!-- WORKOUT -->
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                🏋️
+            </div>
+
+            <div class="stat-label">
+                Total Workouts
+            </div>
+
+            <div class="stat-value">
+                @totalWorkouts
+            </div>
+
+        </div>
+
+
+        <!-- ACTIVE TIME -->
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                ⏱️
+            </div>
+
+            <div class="stat-label">
+                Active Time
+            </div>
+
+            <div class="stat-value">
+                @totalHours h @remainingMinutes m
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =========================
+         GOAL PROGRESS
+         ========================= -->
+<!-- =========================
+     GOAL PROGRESS
+     ========================= -->
+
+<div class="progress-card">
+
+    <div class="card-title">
+        📊 Goal Progress
+    </div>
+
+    <!-- START WEIGHT -->
+    <div class="goal-info-row">
+        <span>Start Weight</span>
+
+        <strong>
+            @if (startWeight > 0)
+            {
+                @startWeight.ToString("0.0")
+                <span>kg</span>
+            }
+            else
+            {
+                <span>--</span>
+            }
+        </strong>
+    </div>
+
+    <!-- CURRENT WEIGHT -->
+    <div class="goal-info-row">
+        <span>Current Weight</span>
+
+        <strong>
+            @if (currentWeight > 0)
+            {
+                @currentWeight.ToString("0.0")
+                <span>kg</span>
+            }
+            else
+            {
+                <span>--</span>
+            }
+        </strong>
+    </div>
+
+    <!-- TARGET WEIGHT -->
+    <div class="goal-info-row">
+        <span>Target Weight</span>
+
+        <strong>
+            @if (targetWeight > 0)
+            {
+                @targetWeight.ToString("0.0")
+                <span>kg</span>
+            }
+            else
+            {
+                <span>Not Set</span>
+            }
+        </strong>
+    </div>
+
+    <!-- GOAL DURATION -->
+    <div class="goal-info-row">
+        <span>Goal Duration</span>
+
+        <strong>
+            @if (goalDuration > 0)
+            {
+                @goalDuration <span>Months</span>
+            }
+            else
+            {
+                <span>Not Set</span>
+            }
+        </strong>
+    </div>
+
+    <!-- PROGRESS BAR -->
+    <div class="progress-track">
+        <div class="progress-fill"
+             style="width: @(Math.Clamp(goalPercent, 0, 100).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%;">
+        </div>
+    </div>
+
+    <!-- PROGRESS PERCENTAGE -->
+    <div class="progress-percent">
+        @Math.Clamp(goalPercent, 0, 100).ToString("0")% completed
+    </div>
+
+</div>
+
+
+    <!-- =========================
+         WEIGHT PROGRESS
+         ========================= -->
+
+    <div class="progress-card">
+
+        <div class="card-title">
+            📈 Weight Progress
+        </div>
+
+
+        @if (entries.Any())
+        {
+
+            var chartEntries = entries
+                .TakeLast(8)
+                .ToList();
+
+            double chartMin = chartEntries
+                .Where(x => x.Weight.HasValue)
+                .Select(x => x.Weight.Value)
+                .DefaultIfEmpty(currentWeight)
+                .Min();
+
+            double chartMax = chartEntries
+                .Where(x => x.Weight.HasValue)
+                .Select(x => x.Weight.Value)
+                .DefaultIfEmpty(currentWeight)
+                .Max();
+
+
+            if (chartMax <= chartMin)
+            {
+                chartMax = chartMin + 1;
+            }
+
+
+            <div class="weight-summary">
+
+                <div>
+
+                    <div class="weight-summary-label">
+                        Latest Weight
+                    </div>
+
+                    <div class="weight-summary-value">
+
+                        @if (currentWeight > 0)
+                        {
+                            @currentWeight.ToString("0.0")
+                            <span>kg</span>
+                        }
+                        else
+                        {
+                            <span>Not Set</span>
+                        }
+
+                    </div>
+
+                </div>
+
+
+                <div style="text-align:right;">
+
+                    <div class="weight-summary-label">
+                        Change
+                    </div>
+
+                    <div class="weight-summary-value">
+
+                        @if (weightChange > 0)
+                        {
+                            <span>↓ @weightChange.ToString("0.0") kg</span>
+                        }
+                        else if (weightChange < 0)
+                        {
+                            <span>↑ @Math.Abs(weightChange).ToString("0.0") kg</span>
+                        }
+                        else
+                        {
+                            <span>0.0 kg</span>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="weight-bars">
+
+
+                @foreach (var item in chartEntries)
+                {
+
+                    double itemWeight =
+                        item.Weight.GetValueOrDefault();
+
+
+                    double normalizedHeight = 30;
+
+
+                    if (chartMax > chartMin)
+                    {
+                        normalizedHeight =
+                            35 +
+                            (
+                                (itemWeight - chartMin)
+                                /
+                                (chartMax - chartMin)
+                            ) * 110;
+                    }
+
+
+                    if (normalizedHeight < 20)
+                    {
+                        normalizedHeight = 20;
+                    }
+
+
+                    if (normalizedHeight > 145)
+                    {
+                        normalizedHeight = 145;
+                    }
+
+
+                    <div class="weight-column">
+
+                        <div class="weight-value">
+
+                            @itemWeight.ToString("0.0") kg
+
+                        </div>
+
+
+                        <div class="weight-bar"
+                             style="height:@normalizedHeight.ToString("0")px;">
+                        </div>
+
+
+                        <div class="weight-date">
+
+                            @item.LogDate.ToString("dd MMM")
+
+                        </div>
+
+                    </div>
+
+                }
+
+
+            </div>
+
+        }
+        else
+        {
+
+            <div class="empty-chart">
+
+                <div class="empty-chart-icon">
+                    📈
+                </div>
+
+                <strong>
+                    Your progress chart will appear here
+                </strong>
+
+                <span>
+                    Add progress entries over time to track your journey.
+                </span>
+
+            </div>
+
+        }
+
+    </div>
+
+
+
+    <!-- =========================
+         PROGRESS HISTORY
+         ========================= -->
+
+    <div class="progress-card">
+
+        <div class="card-title">
+            📋 Progress History
+        </div>
+
+
+        @if (latestEntries.Any())
+        {
+
+            @foreach (var item in latestEntries)
+            {
+
+                <div class="history-item">
+
+
+                    <div>
+
+                        <div class="history-date">
+
+                            @item.LogDate.ToString("dd MMM yyyy")
+
+                        </div>
+
+
+                        <div class="history-details">
+
+                            🏋️ @item.WorkoutSessions workouts
+
+                            &nbsp; • &nbsp;
+
+                            ⏱️ @item.WorkoutMinutes minutes
+
+                            @if (!string.IsNullOrWhiteSpace(item.Notes))
+                            {
+                                <span>
+                                    &nbsp; • &nbsp; @item.Notes
+                                </span>
+                            }
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="history-right">
+
+
+                        <div class="history-weight">
+
+                            @if (item.Weight.HasValue)
+                            {
+                                @item.Weight.Value.ToString("0.0")
+                                <span>kg</span>
+                            }
+                            else
+                            {
+                                <span>--</span>
+                            }
+
+                        </div>
+
+
+                        <div class="history-actions">
+
+                            <a asp-action="Edit"
+                               asp-route-id="@item.Id"
+                               class="edit-btn">
+
+                                Edit
+
+                            </a>
+
+
+                            <a asp-action="Delete"
+                               asp-route-id="@item.Id"
+                               class="delete-btn">
+
+                                Delete
+
+                            </a>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            }
+
+        }
+        else
+        {
+
+            <div class="empty-history">
+
+                <div class="empty-history-icon">
+                    📋
+                </div>
+
+                <strong>
+                    No progress recorded yet
+                </strong>
+
+                <span>
+                    Start your fitness journey using the
+                    <b>+ Log Progress</b> button above.
+                </span>
+
+            </div>
+
+        }
+
+    </div>
+
+
+</div>

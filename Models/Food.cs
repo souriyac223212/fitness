@@ -4,7 +4,7 @@
     {
         public int FoodId { get; set; }
 
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         public double Calories { get; set; }
 
@@ -15,5 +15,8 @@
         public double Fat { get; set; }
 
         public double Cost { get; set; }
+
+        // Breakfast / Lunch / Dinner
+        public string MealType { get; set; } = "Breakfast";
     }
 }

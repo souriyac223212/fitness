@@ -1,0 +1,890 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+
+    var users = ViewBag.Users as IEnumerable<FitWiseBD.Models.ApplicationUser>;
+    var userRoles = ViewBag.UserRoles as Dictionary<string, string>;
+    var userProfiles = ViewBag.UserProfiles as Dictionary<string, FitWiseBD.Models.UserProfile>;
+
+    var totalUsers = ViewBag.TotalUsers ?? 0;
+    var totalFoods = ViewBag.TotalFoods ?? 0;
+
+    var adminName = ViewBag.AdminName ?? "Administrator";
+    var adminEmail = ViewBag.AdminEmail ?? "";
+}
+
+<style>
+
+    /* ==========================================
+       ADMIN PAGE
+       ========================================== */
+
+    .admin-page {
+        background: #f7f5f9;
+        min-height: calc(100vh - 80px);
+        padding: 35px 0 60px;
+    }
+
+    .admin-container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 0 25px;
+    }
+
+
+    /* ==========================================
+       ADMIN HEADER
+       ========================================== */
+
+    .admin-header {
+        background: linear-gradient(135deg, #260044, #3b0066);
+        border-radius: 22px;
+        padding: 32px 38px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(38, 0, 68, 0.15);
+        margin-bottom: 28px;
+    }
+
+    .admin-header::after {
+        content: "";
+        position: absolute;
+        width: 190px;
+        height: 190px;
+        background: #f19b88;
+        border-radius: 50%;
+        right: -65px;
+        top: -85px;
+    }
+
+    .admin-header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .admin-header h1 {
+        font-size: 32px;
+        font-weight: 700;
+        margin: 0 0 8px;
+    }
+
+    .admin-header p {
+        margin: 0;
+        color: #eee4f5;
+        font-size: 15px;
+    }
+
+    .admin-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: #f19b88;
+        color: #2a0045;
+        padding: 7px 14px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+
+    /* ==========================================
+       ADMIN PROFILE
+       ========================================== */
+
+    .profile-card {
+        background: white;
+        border-radius: 18px;
+        padding: 22px 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+        margin-bottom: 28px;
+    }
+
+    .profile-left {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+    .admin-avatar {
+        width: 65px;
+        height: 65px;
+        border-radius: 50%;
+        background: #32005a;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 25px;
+        font-weight: 700;
+    }
+
+    .profile-info h3 {
+        margin: 0 0 5px;
+        color: #250043;
+        font-size: 19px;
+    }
+
+    .profile-info p {
+        margin: 0;
+        color: #777;
+        font-size: 14px;
+    }
+
+    .profile-role {
+        display: inline-block;
+        margin-top: 7px;
+        background: #f7e5df;
+        color: #5b1745;
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+
+    /* ==========================================
+       STATISTICS
+       ========================================== */
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 18px;
+        padding: 23px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        display: flex;
+        align-items: center;
+        gap: 17px;
+        transition: 0.25s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+
+    .stat-icon {
+        width: 55px;
+        height: 55px;
+        border-radius: 15px;
+        background: #f4eafa;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+    }
+
+    .stat-info span {
+        display: block;
+        color: #777;
+        font-size: 13px;
+        margin-bottom: 4px;
+    }
+
+    .stat-info strong {
+        font-size: 26px;
+        color: #270046;
+    }
+
+
+    /* ==========================================
+       USER MANAGEMENT
+       ========================================== */
+
+    .users-section {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 5px 22px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+
+    .users-header {
+        padding: 25px 28px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #eee;
+    }
+
+    .users-title h2 {
+        margin: 0 0 5px;
+        color: #260044;
+        font-size: 22px;
+    }
+
+    .users-title p {
+        margin: 0;
+        color: #888;
+        font-size: 13px;
+    }
+
+    .add-user-btn {
+        background: #2b004b;
+        color: white;
+        text-decoration: none;
+        padding: 11px 18px;
+        border-radius: 25px;
+        font-size: 13px;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+
+    .add-user-btn:hover {
+        background: #4a0873;
+        color: white;
+    }
+
+
+    /* ==========================================
+       SEARCH
+       ========================================== */
+
+    .search-area {
+        padding: 18px 28px;
+        background: #faf9fb;
+        border-bottom: 1px solid #eee;
+    }
+
+    .search-box {
+        max-width: 400px;
+        border: 1px solid #ddd;
+        background: white;
+        border-radius: 25px;
+        padding: 10px 16px;
+        outline: none;
+        width: 100%;
+        font-size: 13px;
+    }
+
+
+    /* ==========================================
+       TABLE
+       ========================================== */
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .users-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 950px;
+    }
+
+    .users-table th {
+        background: #faf9fb;
+        color: #666;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        padding: 15px 20px;
+        text-align: left;
+    }
+
+    .users-table td {
+        padding: 17px 20px;
+        border-top: 1px solid #eee;
+        color: #333;
+        font-size: 13px;
+        vertical-align: middle;
+    }
+
+
+    /* ==========================================
+       USER
+       ========================================== */
+
+    .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #32005a;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: #260044;
+    }
+
+    .user-email {
+        font-size: 11px;
+        color: #888;
+        margin-top: 3px;
+    }
+
+
+    /* ==========================================
+       ROLE BADGE
+       ========================================== */
+
+    .role-badge {
+        background: #eee7f3;
+        color: #4b1765;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .admin-role {
+        background: #f19b88;
+        color: #260044;
+    }
+
+
+    /* ==========================================
+       PROFILE INFO
+       ========================================== */
+
+    .profile-mini {
+        font-size: 11px;
+        color: #777;
+        line-height: 1.5;
+    }
+
+    .profile-mini strong {
+        color: #32005a;
+    }
+
+
+    /* ==========================================
+       ACTION BUTTONS
+       ========================================== */
+
+    .action-buttons {
+        display: flex;
+        gap: 7px;
+    }
+
+    .action-btn {
+        border: none;
+        padding: 7px 11px;
+        border-radius: 8px;
+        font-size: 11px;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .view-btn {
+        background: #eee9f3;
+        color: #3c0b55;
+    }
+
+    .edit-btn {
+        background: #fff0dc;
+        color: #995b00;
+    }
+
+    .delete-btn {
+        background: #ffe6e6;
+        color: #b42323;
+    }
+
+    .action-btn:hover {
+        opacity: 0.8;
+    }
+
+
+    /* ==========================================
+       EMPTY
+       ========================================== */
+
+    .empty-state {
+        padding: 50px;
+        text-align: center;
+        color: #888;
+    }
+
+
+    /* ==========================================
+       RESPONSIVE
+       ========================================== */
+
+    @@media (max-width: 800px) {
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-card {
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .users-header {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .admin-header h1 {
+            font-size: 26px;
+        }
+    }
+
+</style>
+
+
+<div class="admin-page">
+
+    <div class="admin-container">
+
+
+        <!-- ==========================================
+             ADMIN HEADER
+             ========================================== -->
+
+        <div class="admin-header">
+
+            <div class="admin-header-content">
+
+                <div class="admin-badge">
+                    👑 ADMINISTRATOR
+                </div>
+
+                <h1>
+                    Welcome to FitWise BD Admin Panel
+                </h1>
+
+                <p>
+                    Manage users, foods and monitor the FitWise BD platform.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==========================================
+             ADMIN PROFILE
+             ========================================== -->
+
+        <div class="profile-card">
+
+            <div class="profile-left">
+
+                <div class="admin-avatar">
+                    👑
+                </div>
+
+                <div class="profile-info">
+
+                    <h3>
+                        @adminName
+                    </h3>
+
+                    <p>
+                        @adminEmail
+                    </p>
+
+                    <span class="profile-role">
+                        System Administrator
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div>
+
+                <span class="role-badge admin-role">
+                    ● Admin Access
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==========================================
+             STATISTICS
+             ========================================== -->
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    👥
+                </div>
+
+                <div class="stat-info">
+
+                    <span>Total Users</span>
+
+                    <strong>
+                        @totalUsers
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    🍎
+                </div>
+
+                <div class="stat-info">
+
+                    <span>Total Foods</span>
+
+                    <strong>
+                        @totalFoods
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    🛡️
+                </div>
+
+                <div class="stat-info">
+
+                    <span>System Status</span>
+
+                    <strong style="font-size:20px;">
+                        Active
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==========================================
+             USER MANAGEMENT
+             ========================================== -->
+
+        <div class="users-section">
+
+            <div class="users-header">
+
+                <div class="users-title">
+
+                    <h2>
+                        👥 User Management
+                    </h2>
+
+                    <p>
+                        View and manage all registered FitWise BD users.
+                    </p>
+
+                </div>
+
+
+                <a asp-controller="Users"
+                   asp-action="Create"
+                   class="add-user-btn">
+
+                    + Add New User
+
+                </a>
+
+            </div>
+
+
+            <!-- ==========================================
+                 SEARCH
+                 ========================================== -->
+
+            <div class="search-area">
+
+                <input type="text"
+                       id="userSearch"
+                       class="search-box"
+                       placeholder="🔍 Search users by name or email..."
+                       onkeyup="searchUsers()" />
+
+            </div>
+
+
+            <!-- ==========================================
+                 USER TABLE
+                 ========================================== -->
+
+            <div class="table-wrapper">
+
+                <table class="users-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>User</th>
+
+                            <th>Email</th>
+
+                            <th>Role</th>
+
+                            <th>Profile</th>
+
+                            <th>User ID</th>
+
+                            <th>Actions</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="usersTableBody">
+
+                        @if (users != null && users.Any())
+                        {
+
+                            foreach (var user in users)
+                            {
+
+                                var role = "User";
+
+                                if (userRoles != null &&
+                                    userRoles.ContainsKey(user.Id))
+                                {
+                                    role = userRoles[user.Id];
+                                }
+
+
+                                FitWiseBD.Models.UserProfile profile = null;
+
+                                if (userProfiles != null &&
+                                    userProfiles.ContainsKey(user.Id))
+                                {
+                                    profile = userProfiles[user.Id];
+                                }
+
+
+                                <tr class="user-row">
+
+                                    <!-- USER -->
+
+                                    <td>
+
+                                        <div class="user-cell">
+
+                                            <div class="user-avatar">
+
+                                                @(string.IsNullOrEmpty(user.FullName)
+                                                    ? "U"
+                                                    : user.FullName.Substring(0, 1).ToUpper())
+
+                                            </div>
+
+                                            <div>
+
+                                                <div class="user-name">
+                                                    @user.FullName
+                                                </div>
+
+                                                <div class="user-email">
+                                                    @user.UserName
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- EMAIL -->
+
+                                    <td>
+                                        @user.Email
+                                    </td>
+
+
+                                    <!-- ROLE -->
+
+                                    <td>
+
+                                        <span class="role-badge @(role == "Admin" ? "admin-role" : "")">
+
+                                            @(role == "Admin" ? "👑 Admin" : "User")
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- PROFILE -->
+
+                                    <td>
+
+                                        @if (profile != null)
+                                        {
+
+                                            <div class="profile-mini">
+
+                                                <strong>Age:</strong>
+                                                @profile.Age
+                                                <br />
+
+                                                <strong>Weight:</strong>
+                                                @profile.Weight
+                                                <br />
+
+                                                <strong>Goal:</strong>
+                                                @profile.FitnessGoal
+
+                                            </div>
+
+                                        }
+                                        else
+                                        {
+
+                                            <span class="profile-mini">
+                                                Not completed
+                                            </span>
+
+                                        }
+
+                                    </td>
+
+
+                                    <!-- USER ID -->
+
+                                    <td>
+
+                                        <small>
+                                            @user.Id
+                                        </small>
+
+                                    </td>
+
+
+                                    <!-- ACTIONS -->
+
+                                    <td>
+
+                                        <div class="action-buttons">
+
+                                            <a asp-controller="Users"
+                                               asp-action="Details"
+                                               asp-route-id="@user.Id"
+                                               class="action-btn view-btn">
+
+                                                View
+
+                                            </a>
+
+
+                                            <a asp-controller="Users"
+                                               asp-action="Edit"
+                                               asp-route-id="@user.Id"
+                                               class="action-btn edit-btn">
+
+                                                Edit
+
+                                            </a>
+
+
+                                            <a asp-controller="Users"
+                                               asp-action="Delete"
+                                               asp-route-id="@user.Id"
+                                               class="action-btn delete-btn">
+
+                                                Delete
+
+                                            </a>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                            }
+
+                        }
+
+                        else
+                        {
+
+                            <tr>
+
+                                <td colspan="6">
+
+                                    <div class="empty-state">
+
+                                        👤 No registered users found.
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    function searchUsers() {
+
+        const input =
+            document
+                .getElementById("userSearch")
+                .value
+                .toLowerCase();
+
+        const rows =
+            document.querySelectorAll(".user-row");
+
+        rows.forEach(row => {
+
+            const text =
+                row.innerText.toLowerCase();
+
+            row.style.display =
+                text.includes(input)
+                    ? ""
+                    : "none";
+
+        });
+
+    }
+
+</script>

@@ -1,0 +1,689 @@
+﻿@{
+    ViewData["Title"] = "FitWise BD AI";
+}
+
+<style>
+    /* FitWise AI — wider, modern chat layout */
+    .fitness-ai-page {
+        width: min(1100px, calc(100% - 32px));
+        max-width: 1100px;
+        margin: 24px auto;
+        padding: 0;
+        color: #21003d;
+    }
+
+    .fitness-ai-header {
+        background: linear-gradient(135deg, #21003d, #451064);
+        color: white;
+        padding: 24px;
+        border-radius: 20px 20px 0 0;
+    }
+
+        .fitness-ai-header h1 {
+            margin: 0 0 8px;
+            font-size: 25px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+    .ai-emoji {
+        display: inline-block;
+        animation: aiEmojiFloat 2.5s ease-in-out infinite;
+    }
+
+    @@keyframes aiEmojiFloat {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-5px) rotate(8deg);
+        }
+    }
+
+    .fitness-ai-header p {
+        margin: 0;
+        color: #e5d9ef;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .fitness-ai-chat {
+        width: 100%;
+        min-height: 650px;
+        border: 1px solid #eee7f5;
+        border-radius: 0 0 20px 20px;
+        background: #fff;
+        box-shadow: 0 12px 40px rgba(45, 0, 70, 0.10);
+        overflow: hidden;
+    }
+
+    .fitness-ai-messages {
+        min-height: 380px;
+        max-height: 65vh;
+        overflow-y: auto;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        scroll-behavior: smooth;
+    }
+
+    .fitness-ai-message {
+        max-width: 90%;
+        padding: 16px 20px;
+        margin: 0;
+        border-radius: 16px;
+        line-height: 1.75;
+        font-size: 14px;
+        overflow-wrap: anywhere;
+        word-break: normal;
+    }
+
+        .fitness-ai-message.user {
+            align-self: flex-end;
+            margin-left: auto;
+            background: #29003f;
+            color: #fff;
+            border-bottom-right-radius: 5px;
+            white-space: pre-wrap;
+        }
+
+        .fitness-ai-message.assistant {
+            align-self: flex-start;
+            margin-right: auto;
+            background: #f5effb;
+            color: #301044;
+            border-bottom-left-radius: 5px;
+        }
+
+        .fitness-ai-message.error {
+            align-self: stretch;
+            max-width: 100%;
+            background: #fff0f0;
+            color: #a00020;
+            white-space: pre-wrap;
+        }
+
+        /* Markdown formatting inside AI answers */
+        .fitness-ai-message.assistant p {
+            margin: 0 0 12px;
+        }
+
+            .fitness-ai-message.assistant p:last-child {
+                margin-bottom: 0;
+            }
+
+        .fitness-ai-message.assistant h1,
+        .fitness-ai-message.assistant h2,
+        .fitness-ai-message.assistant h3,
+        .fitness-ai-message.assistant h4 {
+            color: #29003f;
+            line-height: 1.4;
+            margin: 18px 0 10px;
+        }
+
+        .fitness-ai-message.assistant h1 {
+            font-size: 22px;
+        }
+
+        .fitness-ai-message.assistant h2 {
+            font-size: 20px;
+        }
+
+        .fitness-ai-message.assistant h3 {
+            font-size: 17px;
+        }
+
+        .fitness-ai-message.assistant h4 {
+            font-size: 15px;
+        }
+
+        .fitness-ai-message.assistant ul,
+        .fitness-ai-message.assistant ol {
+            padding-left: 24px;
+            margin: 10px 0 14px;
+        }
+
+        .fitness-ai-message.assistant li {
+            margin-bottom: 6px;
+        }
+
+        .fitness-ai-message.assistant strong {
+            color: #29003f;
+            font-weight: 700;
+        }
+
+        .fitness-ai-message.assistant blockquote {
+            border-left: 4px solid #8b5cf6;
+            padding: 8px 14px;
+            margin: 12px 0;
+            background: #eee7f5;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .fitness-ai-message.assistant hr {
+            border: 0;
+            border-top: 1px solid #ded3e8;
+            margin: 16px 0;
+        }
+
+        .fitness-ai-message.assistant a {
+            color: #6d28d9;
+            text-decoration: underline;
+            overflow-wrap: anywhere;
+        }
+
+        .fitness-ai-message.assistant code {
+            background: #e9def4;
+            color: #421064;
+            padding: 2px 5px;
+            border-radius: 5px;
+            font-size: .92em;
+        }
+
+        .fitness-ai-message.assistant pre {
+            max-width: 100%;
+            overflow-x: auto;
+            padding: 14px;
+            border-radius: 10px;
+            background: #eee7f5;
+            white-space: pre;
+        }
+
+            .fitness-ai-message.assistant pre code {
+                padding: 0;
+                background: transparent;
+            }
+
+        .fitness-ai-message.assistant table {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            border-collapse: collapse;
+            margin: 12px 0;
+        }
+
+        .fitness-ai-message.assistant th,
+        .fitness-ai-message.assistant td {
+            padding: 8px 10px;
+            border: 1px solid #ded3e8;
+            text-align: left;
+        }
+
+        .fitness-ai-message.assistant th {
+            background: #e9def4;
+        }
+
+    .fitness-ai-compose {
+        border-top: 1px solid #eee7f5;
+        padding: 18px;
+        background: #fff;
+    }
+
+    .fitness-ai-input-row {
+        display: flex;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .fitness-ai-input {
+        flex: 1;
+        min-width: 0;
+        min-height: 52px;
+        resize: vertical;
+        border: 1px solid #ded3e8;
+        border-radius: 13px;
+        padding: 14px;
+        font: inherit;
+        font-size: 14px;
+        color: #21003d;
+        background: #fff;
+        outline: none;
+        transition: border-color .2s, box-shadow .2s;
+    }
+
+        .fitness-ai-input:focus {
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, .12);
+        }
+
+    .fitness-ai-send {
+        flex-shrink: 0;
+        border: none;
+        border-radius: 13px;
+        padding: 0 24px;
+        background: #29003f;
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background .2s, transform .2s;
+    }
+
+        .fitness-ai-send:hover:not(:disabled) {
+            background: #501274;
+            transform: translateY(-1px);
+        }
+
+        .fitness-ai-send:disabled {
+            opacity: .55;
+            cursor: wait;
+            transform: none;
+        }
+
+    .fitness-ai-options {
+        margin-top: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        color: #666;
+        font-size: 12px;
+    }
+
+        .fitness-ai-options input {
+            accent-color: #501274;
+        }
+
+    .fitness-ai-suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 0 24px 18px;
+    }
+
+        .fitness-ai-suggestions button {
+            border: 1px solid #e3d7ef;
+            border-radius: 20px;
+            padding: 9px 13px;
+            background: #fff;
+            color: #421064;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all .2s ease;
+        }
+
+            .fitness-ai-suggestions button:hover {
+                background: #f5effa;
+                border-color: #a78bfa;
+                transform: translateY(-2px);
+            }
+
+    .fitness-ai-status {
+        color: #777;
+        font-size: 12px;
+        padding: 0 24px 12px;
+    }
+
+    .fitness-ai-footer-note {
+        font-size: 12px;
+        color: #888;
+        line-height: 1.7;
+        margin: 12px 0;
+    }
+
+    @@media (max-width: 600px) {
+        .fitness-ai-page {
+            width: calc(100% - 16px);
+            margin: 8px auto;
+        }
+
+        .fitness-ai-header {
+            padding: 18px;
+        }
+
+            .fitness-ai-header h1 {
+                font-size: 21px;
+            }
+
+        .fitness-ai-chat {
+            min-height: 75vh;
+            border-radius: 0 0 14px 14px;
+        }
+
+        .fitness-ai-messages {
+            padding: 12px;
+            min-height: 300px;
+            max-height: 60vh;
+        }
+
+        .fitness-ai-message {
+            max-width: 96%;
+            padding: 12px;
+            font-size: 13px;
+        }
+
+        .fitness-ai-suggestions {
+            padding: 0 12px 14px;
+        }
+
+        .fitness-ai-compose {
+            padding: 12px;
+        }
+
+        .fitness-ai-input-row {
+            gap: 8px;
+        }
+
+        .fitness-ai-input {
+            padding: 11px;
+        }
+
+        .fitness-ai-send {
+            padding: 0 14px;
+        }
+
+        .fitness-ai-status {
+            padding: 0 12px 10px;
+        }
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+        .ai-emoji {
+            animation: none;
+        }
+
+        .fitness-ai-messages {
+            scroll-behavior: auto;
+        }
+
+        .fitness-ai-suggestions button,
+        .fitness-ai-send {
+            transition: none;
+        }
+    }
+</style>
+
+<div class="fitness-ai-page">
+    <header class="fitness-ai-header">
+        <h1>
+            <span class="ai-emoji" aria-hidden="true">✨</span>
+            FitWise BD AI Assistant
+        </h1>
+        <p>
+            Your personal fitness, workout and nutrition companion.
+            Ask questions naturally.
+        </p>
+    </header>
+
+    <section class="fitness-ai-chat">
+        <div id="aiMessages"
+             class="fitness-ai-messages"
+             aria-live="polite">
+            <div class="fitness-ai-message assistant">
+                Hi! I'm your FitWise BD AI assistant.
+
+                Ask me about workouts, meals, protein, calories,
+                weight goals or fitness routines.
+            </div>
+        </div>
+
+        <div class="fitness-ai-suggestions">
+            <button type="button"
+                    data-prompt="Suggest a beginner home workout without equipment.">
+                🏠 Home workout
+            </button>
+
+            <button type="button"
+                    data-prompt="Suggest a balanced daily meal plan using common foods in Bangladesh.">
+                🍲 What can I eat today?
+            </button>
+
+            <button type="button"
+                    data-prompt="Explain how I can reach my fitness goal safely.">
+                🎯 My fitness goal
+            </button>
+        </div>
+
+        <div id="aiStatus"
+             class="fitness-ai-status"
+             role="status"></div>
+
+        <div class="fitness-ai-compose">
+            <form id="aiChatForm">
+                @Html.AntiForgeryToken()
+
+                <div class="fitness-ai-input-row">
+                    <textarea id="aiMessage"
+                              class="fitness-ai-input"
+                              rows="2"
+                              maxlength="2000"
+                              placeholder="Ask anything about fitness or nutrition..."
+                              required></textarea>
+
+                    <button id="aiSend"
+                            class="fitness-ai-send"
+                            type="submit">
+                        Send ↑
+                    </button>
+                </div>
+
+                <div class="fitness-ai-options">
+                    <label>
+                        <input id="aiWebSearch" type="checkbox" />
+                        Search the web for current information
+                    </label>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <p class="fitness-ai-footer-note">
+        AI responses may contain mistakes. Nutrition values are estimates
+        unless verified against a reliable source. For medical conditions,
+        consult a qualified healthcare professional.
+    </p>
+</div>
+
+<!-- Markdown parser and HTML sanitizer -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+
+<script>
+    (() => {
+        const form = document.getElementById("aiChatForm");
+        const input = document.getElementById("aiMessage");
+        const sendButton = document.getElementById("aiSend");
+        const messagesElement = document.getElementById("aiMessages");
+        const statusElement = document.getElementById("aiStatus");
+        const webSearch = document.getElementById("aiWebSearch");
+
+        const history = [];
+
+        const currentUserKey = @Html.Raw(
+                                        System.Text.Json.JsonSerializer.Serialize(
+                                                        User.FindFirst(
+                                                                        System.Security.Claims.ClaimTypes.NameIdentifier
+                                                        )?.Value ?? "guest"
+                        )
+                        );
+
+        const storageKey = "FitWiseAIChatHistory_" + currentUserKey;
+        const chatUrl = @Html.Raw(
+                        System.Text.Json.JsonSerializer.Serialize(
+                        Url.Action("Chat", "FitnessAi")
+                        )
+                        );
+
+        function addMessage(role, content, isError = false) {
+            const messageElement = document.createElement("div");
+
+            messageElement.className =
+                "fitness-ai-message " +
+                (isError ? "error" : role);
+
+            const messageText = String(content ?? "");
+
+            /*
+             * Render Markdown only for successful AI answers.
+             * Sanitize the generated HTML before inserting it.
+             * User messages and error messages remain plain text.
+             */
+            if (
+                role === "assistant" &&
+                !isError &&
+                typeof marked !== "undefined" &&
+                typeof DOMPurify !== "undefined"
+            ) {
+                const safeHtml = DOMPurify.sanitize(
+                    marked.parse(messageText)
+                );
+
+                messageElement.innerHTML = safeHtml;
+            } else {
+                messageElement.textContent = messageText;
+            }
+
+            messagesElement.appendChild(messageElement);
+            messagesElement.scrollTop = messagesElement.scrollHeight;
+        }
+
+        // Restore this user's saved conversation in this browser.
+        try {
+            const savedHistory = JSON.parse(
+                localStorage.getItem(storageKey) || "[]"
+            );
+
+            if (Array.isArray(savedHistory)) {
+                const validHistory = savedHistory.filter(item =>
+                    item &&
+                    (item.role === "user" || item.role === "assistant") &&
+                    typeof item.content === "string" &&
+                    item.content.trim().length > 0
+                ).slice(-20);
+
+                if (validHistory.length > 0) {
+                    messagesElement.innerHTML = "";
+
+                    for (const item of validHistory) {
+                        history.push({
+                            role: item.role,
+                            content: item.content
+                        });
+                        addMessage(item.role, item.content);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Could not restore AI chat history:", error);
+        }
+
+        function saveHistory() {
+            try {
+                localStorage.setItem(
+                    storageKey,
+                    JSON.stringify(history.slice(-20))
+                );
+            } catch (error) {
+                console.error("Could not save AI chat history:", error);
+                statusElement.textContent =
+                    "Chat answered, but this browser could not save the history.";
+            }
+        }
+
+        async function sendMessage(message) {
+            message = message.trim();
+
+            if (!message || sendButton.disabled)
+                return;
+
+            const previousHistory = history.slice(-10);
+
+            addMessage("user", message);
+
+            input.value = "";
+            sendButton.disabled = true;
+            statusElement.textContent = "✨ AI is thinking...";
+
+            try {
+                const tokenInput = form.querySelector(
+                    'input[name="__RequestVerificationToken"]'
+                );
+
+                if (!tokenInput) {
+                    throw new Error(
+                        "Security token not found. Refresh the page and try again."
+                    );
+                }
+
+                const response = await fetch(chatUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "RequestVerificationToken": tokenInput.value
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        useWebSearch: webSearch.checked,
+                        history: previousHistory
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        result.error ||
+                        "The request could not be completed."
+                    );
+                }
+
+                if (
+                    typeof result.answer !== "string" ||
+                    !result.answer.trim()
+                ) {
+                    throw new Error(
+                        "The AI returned an empty answer. Please try again."
+                    );
+                }
+
+                addMessage("assistant", result.answer);
+
+                history.push(
+                    { role: "user", content: message },
+                    { role: "assistant", content: result.answer }
+                );
+
+                // Keep the conversation context manageable.
+                if (history.length > 20) {
+                    history.splice(0, history.length - 20);
+                }
+
+                // Save the conversation after a successful AI response.
+                saveHistory();
+
+                statusElement.textContent = "";
+            }
+            catch (error) {
+                addMessage(
+                    "assistant",
+                    error.message || "Something went wrong.",
+                    true
+                );
+
+                statusElement.textContent =
+                    "Request failed. You can try again.";
+            }
+            finally {
+                sendButton.disabled = false;
+                input.focus();
+            }
+        }
+
+        form.addEventListener("submit", event => {
+            event.preventDefault();
+            sendMessage(input.value);
+        });
+
+        document.querySelectorAll(
+            ".fitness-ai-suggestions button"
+        ).forEach(button => {
+            button.addEventListener("click", () => {
+                sendMessage(button.dataset.prompt);
+            });
+        });
+    })();
+</script>

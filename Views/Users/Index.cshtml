@@ -1,0 +1,186 @@
+﻿@model IEnumerable<FitWiseBD.Models.ApplicationUser>
+
+@{
+    ViewData["Title"] = "Registered Users";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Registered Users</h2>
+            <p class="text-muted mb-0">
+                View and manage users registered in FitWise BD.
+            </p>
+        </div>
+
+        <div class="text-end">
+            <div class="small text-muted">Total Users</div>
+            <h3 class="fw-bold mb-0">@Model.Count()</h3>
+        </div>
+    </div>
+
+
+    <!-- Users -->
+    <div class="row g-4">
+
+        @if (Model.Any())
+        {
+            @foreach (var user in Model)
+            {
+                <div class="col-xl-4 col-lg-6 col-md-6">
+
+                    <div class="card border-0 shadow-sm h-100"
+                         style="border-radius: 18px;">
+
+                        <div class="card-body p-4">
+
+                            <!-- User Header -->
+                            <div class="d-flex align-items-center mb-4">
+
+                                <!-- Avatar -->
+                                <div class="d-flex align-items-center justify-content-center
+                                    rounded-circle bg-primary text-white fw-bold"
+                                     style="width:60px; height:60px; font-size:22px;">
+
+                                    @(string.IsNullOrWhiteSpace(user.FullName)
+                                        ? "U"
+                                        : user.FullName.Substring(0, 1).ToUpper())
+                                </div>
+
+                                <!-- Name -->
+                                <div class="ms-3">
+
+                                    <h5 class="fw-bold mb-1">
+                                        @(string.IsNullOrWhiteSpace(user.FullName)
+                                            ? "Unknown User"
+                                            : user.FullName)
+                                    </h5>
+
+                                    <span class="badge bg-light text-primary border">
+                                        Registered User
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- User Information -->
+                            <div class="mb-3">
+
+                                <div class="d-flex align-items-center mb-3">
+
+                                    <div class="me-3 text-primary">
+                                        <strong>✉</strong>
+                                    </div>
+
+                                    <div>
+                                        <div class="small text-muted">
+                                            Email
+                                        </div>
+
+                                        <div class="fw-semibold">
+                                            @user.Email
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+                                <div class="d-flex align-items-center mb-3">
+
+                                    <div class="me-3 text-primary">
+                                        <strong>👤</strong>
+                                    </div>
+
+                                    <div>
+                                        <div class="small text-muted">
+                                            Username
+                                        </div>
+
+                                        <div class="fw-semibold">
+                                            @user.UserName
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+                                <div class="d-flex align-items-center">
+
+                                    <div class="me-3 text-primary">
+                                        <strong>🔑</strong>
+                                    </div>
+
+                                    <div>
+                                        <div class="small text-muted">
+                                            User ID
+                                        </div>
+
+                                        <div class="text-muted small"
+                                             style="word-break: break-all;">
+                                            @user.Id
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Divider -->
+                            <hr class="my-4" />
+
+
+                            <!-- Actions -->
+                            <div class="d-flex justify-content-between align-items-center">
+
+                                <span class="text-muted small">
+                                    FitWise BD Account
+                                </span>
+
+                                <a href="#"
+                                   class="btn btn-sm btn-primary px-3"
+                                   style="border-radius: 20px;">
+                                    View
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+        }
+        else
+        {
+            <!-- No Users -->
+            <div class="col-12">
+
+                <div class="card border-0 shadow-sm text-center p-5"
+                     style="border-radius:18px;">
+
+                    <div style="font-size:50px;">
+                        👥
+                    </div>
+
+                    <h4 class="fw-bold mt-3">
+                        No Registered Users
+                    </h4>
+
+                    <p class="text-muted">
+                        There are currently no users registered in FitWise BD.
+                    </p>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</div>

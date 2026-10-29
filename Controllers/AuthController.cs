@@ -306,6 +306,9 @@ namespace FitWiseBD.Controllers
                     await _userManager.GetRolesAsync(user);
 
 
+                var userRole =
+      roles.FirstOrDefault() ?? "User";
+
                 return Ok(new
                 {
                     token = token,
@@ -313,15 +316,15 @@ namespace FitWiseBD.Controllers
                     user = new
                     {
                         id = user.Id,
-
                         name = user.FullName,
-
                         email = user.Email,
+                        role = userRole
+                    },
 
-                        role =
-                            roles.FirstOrDefault()
-                            ?? "User"
-                    }
+                    redirect =
+                        userRole == "Admin"
+                            ? "/Admin"
+                            : "/"
                 });
             }
             catch (Exception ex)
@@ -337,7 +340,7 @@ namespace FitWiseBD.Controllers
                 });
             }
         }
-
+        
 
         // ==========================================
         // LOGOUT

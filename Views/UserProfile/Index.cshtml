@@ -2,628 +2,480 @@
 
 @{
     ViewData["Title"] = "My Profile";
-    Layout = null;
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<!DOCTYPE html>
-
-<html lang="en">
-
-<head>
-
-    <meta charset="utf-8" />
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0" />
-
-    <title>FitWise BD - Profile</title>
-
-
+@section Styles {
     <style>
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f7f5f8;
-            color: #21003d;
-        }
-
-
-        /* NAVBAR */
-
-        .navbar {
-            height: 70px;
-            background: #21003d;
-            color: white;
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            padding: 0 45px;
-        }
-
-
-        .logo {
-            font-size: 25px;
-            font-weight: bold;
-        }
-
-
-        .nav-links {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-        }
-
-
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            font-size: 15px;
-        }
-
-
-        .logout {
-            background: #efa08e;
-            color: #21003d !important;
-
-            padding: 10px 20px;
-
-            border-radius: 20px;
-
-            font-weight: bold;
-        }
-
-
-        /* CONTAINER */
-
-        .container {
+        .profile-page {
             max-width: 900px;
-            margin: auto;
-
+            width: 100%;
+            margin: 0 auto;
             padding: 40px 25px;
-        }
-
-
-        .title {
-            margin-bottom: 25px;
-        }
-
-
-        .title h1 {
-            font-size: 32px;
-            margin-bottom: 8px;
-        }
-
-
-        .title p {
-            color: #777;
-        }
-
-
-        /* PROFILE CARD */
-
-        .profile-card {
-            background: white;
-
-            padding: 30px;
-
-            border-radius: 22px;
-
-            box-shadow:
-                0 5px 20px
-                rgba(0,0,0,0.06);
-        }
-
-
-        .user-info {
-            background: #21003d;
-            color: white;
-
-            padding: 22px;
-
-            border-radius: 18px;
-
-            margin-bottom: 25px;
-        }
-
-
-        .user-info h2 {
-            margin-bottom: 8px;
-        }
-
-
-        .user-info p {
-            color: #ddd;
-        }
-
-
-        /* FORM */
-
-        .form-grid {
-            display: grid;
-
-            grid-template-columns:
-                1fr 1fr;
-
-            gap: 20px;
-        }
-
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-
-        .form-group label {
-            font-weight: bold;
-
-            margin-bottom: 8px;
-        }
-
-
-        .form-group input,
-        .form-group select {
-
-            padding: 13px 15px;
-
-            border: 1px solid #ddd;
-
-            border-radius: 12px;
-
-            font-size: 15px;
-
-            outline: none;
-        }
-
-
-        .form-group input:focus,
-        .form-group select:focus {
-
-            border-color: #21003d;
-        }
-
-
-        /* BUTTONS */
-
-        .buttons {
-            margin-top: 25px;
-
-            display: flex;
-
-            gap: 15px;
-        }
-
-
-        .btn {
-
-            border: none;
-
-            padding: 13px 25px;
-
-            border-radius: 25px;
-
-            cursor: pointer;
-
-            font-weight: bold;
-
-            font-size: 15px;
-        }
-
-
-        .save-btn {
-
-            background: #21003d;
-
-            color: white;
-        }
-
-
-        .delete-btn {
-
-            background: #efa08e;
-
             color: #21003d;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
+            .profile-page .profile-title {
+                margin-bottom: 25px;
+            }
 
-        .success {
+                .profile-page .profile-title h1 {
+                    font-size: 32px;
+                    font-weight: 700;
+                    margin: 0 0 8px;
+                    color: #21003d;
+                }
 
-            background: #d9ffd9;
+                .profile-page .profile-title p {
+                    color: #777;
+                    margin: 0;
+                }
 
-            color: #087a08;
+            .profile-page .profile-card {
+                background: #fff;
+                padding: 30px;
+                border-radius: 22px;
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+            }
 
-            padding: 14px;
+            .profile-page .user-info {
+                background: #21003d;
+                color: #fff;
+                padding: 22px;
+                border-radius: 18px;
+                margin-bottom: 25px;
+                display: flex;
+                align-items: center;
+                gap: 18px;
+                flex-wrap: wrap;
+            }
 
-            border-radius: 12px;
+                .profile-page .user-info h2 {
+                    font-size: 22px;
+                    font-weight: 700;
+                    margin: 0 0 8px;
+                }
 
-            margin-bottom: 20px;
+                .profile-page .user-info p {
+                    color: #ddd;
+                    margin: 0;
+                    overflow-wrap: anywhere;
+                }
 
-            text-align: center;
-        }
+            .profile-page .profile-avatar {
+                width: 88px;
+                height: 88px;
+                flex-shrink: 0;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 3px solid #efa08e;
+                background: #eee3ff;
+            }
 
+            .profile-page .avatar-placeholder {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 38px;
+                color: #21003d;
+            }
 
-        /* MOBILE */
+            .profile-page .form-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+
+            .profile-page .form-group {
+                display: flex;
+                flex-direction: column;
+                min-width: 0;
+            }
+
+                .profile-page .form-group label {
+                    font-weight: 700;
+                    margin-bottom: 8px;
+                    color: #21003d;
+                }
+
+                .profile-page .form-group input,
+                .profile-page .form-group select {
+                    width: 100%;
+                    padding: 11px 15px;
+                    border: 1px solid #ddd;
+                    border-radius: 12px;
+                    font-size: 14px;
+                    background: #fff;
+                    color: #21003d;
+                    outline: none;
+                }
+
+                    .profile-page .form-group input:focus,
+                    .profile-page .form-group select:focus {
+                        border-color: #7027b5;
+                        box-shadow: 0 0 0 3px rgba(112, 39, 181, 0.1);
+                    }
+
+                    .profile-page .form-group input[type="file"] {
+                        padding: 10px;
+                    }
+
+            .profile-page .photo-help {
+                color: #777;
+                font-size: 12px;
+                margin-top: 6px;
+            }
+
+            .profile-page .buttons {
+                margin-top: 25px;
+                display: flex;
+                gap: 15px;
+                flex-wrap: wrap;
+            }
+
+            .profile-page .btn {
+                border: none;
+                padding: 11px 23px;
+                border-radius: 25px;
+                cursor: pointer;
+                font-weight: 700;
+                font-size: 14px;
+                transition: 0.2s ease;
+            }
+
+            .profile-page .save-btn {
+                background: #21003d;
+                color: #fff;
+            }
+
+                .profile-page .save-btn:hover {
+                    background: #7027b5;
+                }
+
+            .profile-page .delete-btn {
+                background: #efa08e;
+                color: #21003d;
+            }
+
+                .profile-page .delete-btn:hover {
+                    background: #f7b5a7;
+                }
+
+            .profile-page .success {
+                background: #d9ffd9;
+                color: #087a08;
+                padding: 14px;
+                border-radius: 12px;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+
+            .profile-page .validation-summary,
+            .profile-page .field-validation-error {
+                color: #b42318;
+            }
+
+            .profile-page .validation-summary {
+                margin-bottom: 15px;
+            }
+
+            .profile-page .field-validation-error {
+                font-size: 12px;
+                margin-top: 5px;
+            }
 
         @@media (max-width: 700px) {
-
-            .navbar {
-                padding: 0 20px;
+            .profile-page {
+                padding: 25px 15px;
             }
 
-            .nav-links {
-                gap: 10px;
-            }
+                .profile-page .profile-card {
+                    padding: 20px;
+                }
 
-            .nav-links a {
-                display: none;
-            }
+                .profile-page .profile-title h1 {
+                    font-size: 27px;
+                }
 
-            .nav-links .logout {
-                display: block;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-
+                .profile-page .form-grid {
+                    grid-template-columns: 1fr;
+                    gap: 16px;
+                }
         }
-
     </style>
+}
 
-</head>
+<div class="profile-page">
 
+    <div class="profile-title">
+        <h1>My Profile</h1>
+        <p>Manage your personal fitness information.</p>
+    </div>
 
-<body>
-
-
-    <!-- NAVBAR -->
-
-    <nav class="navbar">
-
-        <div class="logo">
-            FitWise BD
+    @if (TempData["Success"] != null)
+    {
+        <div class="success">
+            @TempData["Success"]
         </div>
+    }
 
+    <div class="profile-card">
 
-        <div class="nav-links">
+        <!-- USER INFORMATION AND PROFILE PHOTO -->
+        <div class="user-info">
 
-            <a href="/Home">
-                Dashboard
-            </a>
+            @if (!string.IsNullOrWhiteSpace(Model?.ProfilePhotoPath))
+            {
+                <img src="@Model.ProfilePhotoPath"
+                     alt="Profile photo"
+                     class="profile-avatar" />
+            }
+            else
+            {
+                <div class="profile-avatar avatar-placeholder">
+                    👤
+                </div>
+            }
 
-            <a href="/Foods">
-                Nutrition
-            </a>
-
-            <a href="#">
-                Workout
-            </a>
-
-            <a href="#">
-                BMI
-            </a>
-
-            <a href="/UserProfile">
-                Profile
-            </a>
-
-            <a href="#"
-               id="logoutButton"
-               class="logout">
-
-                Logout
-
-            </a>
+            <div>
+                <h2>@ViewBag.FullName</h2>
+                <p>@ViewBag.Email</p>
+            </div>
 
         </div>
 
-    </nav>
+        <!-- PROFILE FORM -->
+        <form asp-controller="UserProfile"
+              asp-action="Save"
+              method="post"
+              enctype="multipart/form-data">
 
+            @Html.AntiForgeryToken()
 
-    <!-- MAIN -->
+            <div asp-validation-summary="ModelOnly"
+                 class="validation-summary"></div>
 
-    <main class="container">
+            <div class="form-grid">
 
+                <!-- PROFILE PHOTO -->
+                <div class="form-group">
+                    <label for="profilePhoto">Profile Photo</label>
 
-        <div class="title">
+                    <input type="file"
+                           id="profilePhoto"
+                           name="profilePhoto"
+                           accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
 
-            <h1>
-                My Profile
-            </h1>
+                    <span class="photo-help">
+                        JPG, PNG or WEBP. Maximum size: 5 MB.
+                        Leave empty to keep your current photo.
+                    </span>
+                </div>
 
-            <p>
-                Manage your personal fitness information.
-            </p>
+                <!-- AGE -->
+                <div class="form-group">
+                    <label for="Age">Age</label>
+                    <input type="number"
+                           id="Age"
+                           name="Age"
+                           min="10"
+                           max="100"
+                           value="@Model?.Age"
+                           placeholder="Enter age" />
+                </div>
 
-        </div>
+                <!-- HEIGHT -->
+                <div class="form-group">
+                    <label for="Height">Height (cm)</label>
+                    <input type="number"
+                           id="Height"
+                           name="Height"
+                           min="50"
+                           max="250"
+                           step="0.1"
+                           value="@Model?.Height"
+                           placeholder="Enter height" />
+                </div>
 
+                <!-- CURRENT WEIGHT -->
+                <div class="form-group">
+                    <label for="Weight">Weight (kg)</label>
+                    <input type="number"
+                           id="Weight"
+                           name="Weight"
+                           min="20"
+                           max="300"
+                           step="0.1"
+                           value="@Model?.Weight"
+                           placeholder="Enter current weight" />
+                </div>
 
-        @if (TempData["Success"] != null)
+                <!-- TARGET WEIGHT -->
+                <div class="form-group">
+                    <label for="TargetWeight">Target Weight (kg)</label>
+                    <input type="number"
+                           id="TargetWeight"
+                           name="TargetWeight"
+                           min="20"
+                           max="300"
+                           step="0.1"
+                           value="@Model?.TargetWeight"
+                           placeholder="e.g. 75" />
+                </div>
+
+                <!-- GOAL DURATION -->
+                <div class="form-group">
+                    <label for="GoalDurationMonths">
+                        Goal Duration (Months)
+                    </label>
+
+                    <select id="GoalDurationMonths"
+                            name="GoalDurationMonths">
+
+                        <option value="1"
+                                selected="@(Model?.GoalDurationMonths == 1)">
+                            1 Month
+                        </option>
+
+                        <option value="2"
+                                selected="@(Model?.GoalDurationMonths == 2)">
+                            2 Months
+                        </option>
+
+                        <option value="3"
+                                selected="@(Model?.GoalDurationMonths == 3)">
+                            3 Months
+                        </option>
+
+                        <option value="4"
+                                selected="@(Model?.GoalDurationMonths == 4)">
+                            4 Months
+                        </option>
+
+                        <option value="5"
+                                selected="@(Model?.GoalDurationMonths == 5)">
+                            5 Months
+                        </option>
+
+                        <option value="6"
+                                selected="@(Model?.GoalDurationMonths == 6)">
+                            6 Months
+                        </option>
+
+                        <option value="9"
+                                selected="@(Model?.GoalDurationMonths == 9)">
+                            9 Months
+                        </option>
+
+                        <option value="12"
+                                selected="@(Model?.GoalDurationMonths == 12)">
+                            12 Months
+                        </option>
+                    </select>
+                </div>
+
+                <!-- GENDER -->
+                <div class="form-group">
+                    <label for="Gender">Gender</label>
+
+                    <select id="Gender" name="Gender">
+                        <option value="">Select Gender</option>
+
+                        <option value="Male"
+                                selected="@(Model?.Gender == "Male")">
+                            Male
+                        </option>
+
+                        <option value="Female"
+                                selected="@(Model?.Gender == "Female")">
+                            Female
+                        </option>
+
+                        <option value="Other"
+                                selected="@(Model?.Gender == "Other")">
+                            Other
+                        </option>
+                    </select>
+                </div>
+
+                <!-- FITNESS GOAL -->
+                <div class="form-group">
+                    <label for="FitnessGoal">Fitness Goal</label>
+
+                    <select id="FitnessGoal" name="FitnessGoal">
+                        <option value="">Select Goal</option>
+
+                        <option value="Weight Loss"
+                                selected="@(Model?.FitnessGoal == "Weight Loss")">
+                            Weight Loss
+                        </option>
+
+                        <option value="Muscle Gain"
+                                selected="@(Model?.FitnessGoal == "Muscle Gain")">
+                            Muscle Gain
+                        </option>
+
+                        <option value="Maintain Weight"
+                                selected="@(Model?.FitnessGoal == "Maintain Weight")">
+                            Maintain Weight
+                        </option>
+                    </select>
+                </div>
+
+                <!-- ACTIVITY LEVEL -->
+                <div class="form-group">
+                    <label for="ActivityLevel">Activity Level</label>
+
+                    <select id="ActivityLevel" name="ActivityLevel">
+                        <option value="">Select Activity</option>
+
+                        <option value="Low"
+                                selected="@(Model?.ActivityLevel == "Low")">
+                            Low
+                        </option>
+
+                        <option value="Moderate"
+                                selected="@(Model?.ActivityLevel == "Moderate")">
+                            Moderate
+                        </option>
+
+                        <option value="High"
+                                selected="@(Model?.ActivityLevel == "High")">
+                            High
+                        </option>
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- SAVE BUTTON -->
+            <div class="buttons">
+                <button type="submit" class="btn save-btn">
+                    Save Profile
+                </button>
+            </div>
+
+        </form>
+
+        <!-- DELETE PROFILE -->
+        @if (Model != null)
         {
-            <div class="success">
-
-                @TempData["Success"]
-
-            </div>
-        }
-
-
-        <div class="profile-card">
-
-
-            <!-- USER INFO -->
-
-            <div class="user-info">
-
-                <h2>
-                    @ViewBag.FullName
-                </h2>
-
-                <p>
-                    @ViewBag.Email
-                </p>
-
-            </div>
-
-
-            <!-- PROFILE FORM -->
-
             <form asp-controller="UserProfile"
-                  asp-action="Save"
-                  method="post">
+                  asp-action="Delete"
+                  method="post"
+                  onsubmit="return confirm('Are you sure you want to delete your profile?');">
 
                 @Html.AntiForgeryToken()
 
-
-                <div class="form-grid">
-
-
-                    <!-- AGE -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Age
-                        </label>
-
-                        <input type="number"
-                               name="Age"
-                               min="10"
-                               max="100"
-                               value="@Model?.Age"
-                               placeholder="Enter age" />
-
-                    </div>
-
-
-                    <!-- HEIGHT -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Height (cm)
-                        </label>
-
-                        <input type="number"
-                               name="Height"
-                               min="50"
-                               max="250"
-                               step="0.1"
-                               value="@Model?.Height"
-                               placeholder="Enter height" />
-
-                    </div>
-
-
-                    <!-- WEIGHT -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Weight (kg)
-                        </label>
-
-                        <input type="number"
-                               name="Weight"
-                               min="20"
-                               max="300"
-                               step="0.1"
-                               value="@Model?.Weight"
-                               placeholder="Enter weight" />
-
-                    </div>
-
-
-                    <!-- GENDER -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Gender
-                        </label>
-
-                        <select name="Gender">
-
-                            <option value="">
-                                Select Gender
-                            </option>
-
-                            <option value="Male"
-                                    selected="@(Model?.Gender == "Male")">
-                                Male
-                            </option>
-
-                            <option value="Female"
-                                    selected="@(Model?.Gender == "Female")">
-                                Female
-                            </option>
-
-                            <option value="Other"
-                                    selected="@(Model?.Gender == "Other")">
-                                Other
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <!-- FITNESS GOAL -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Fitness Goal
-                        </label>
-
-                        <select name="FitnessGoal">
-
-                            <option value="">
-                                Select Goal
-                            </option>
-
-                            <option value="Weight Loss"
-                                    selected="@(Model?.FitnessGoal == "Weight Loss")">
-                                Weight Loss
-                            </option>
-
-                            <option value="Muscle Gain"
-                                    selected="@(Model?.FitnessGoal == "Muscle Gain")">
-                                Muscle Gain
-                            </option>
-
-                            <option value="Maintain Weight"
-                                    selected="@(Model?.FitnessGoal == "Maintain Weight")">
-                                Maintain Weight
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <!-- ACTIVITY -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Activity Level
-                        </label>
-
-                        <select name="ActivityLevel">
-
-                            <option value="">
-                                Select Activity
-                            </option>
-
-                            <option value="Low"
-                                    selected="@(Model?.ActivityLevel == "Low")">
-                                Low
-                            </option>
-
-                            <option value="Moderate"
-                                    selected="@(Model?.ActivityLevel == "Moderate")">
-                                Moderate
-                            </option>
-
-                            <option value="High"
-                                    selected="@(Model?.ActivityLevel == "High")">
-                                High
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                </div>
-
-
                 <div class="buttons">
-
-                    <button type="submit"
-                            class="btn save-btn">
-
-                        Save Profile
-
+                    <button type="submit" class="btn delete-btn">
+                        Delete Profile
                     </button>
-
                 </div>
-
 
             </form>
+        }
 
-
-            <!-- DELETE -->
-
-            @if (Model != null)
-            {
-
-                <form asp-controller="UserProfile"
-                      asp-action="Delete"
-                      method="post"
-                      onsubmit="return confirm('Are you sure you want to delete your profile?');">
-
-                    @Html.AntiForgeryToken()
-
-                    <div class="buttons">
-
-                        <button type="submit"
-                                class="btn delete-btn">
-
-                            Delete Profile
-
-                        </button>
-
-                    </div>
-
-                </form>
-
-            }
-
-
-        </div>
-
-    </main>
-
-
-    <!-- LOGOUT -->
-
-    <script>
-
-        document
-            .getElementById("logoutButton")
-            .addEventListener("click", async function (e) {
-
-                e.preventDefault();
-
-
-                // Remove JWT
-                localStorage.removeItem("token");
-
-
-                // Remove saved user
-                localStorage.removeItem("user");
-
-
-                // Go to login
-                window.location.href =
-                    "/Auth/Login";
-
-            });
-
-    </script>
-
-
-</body>
-
-</html>
+    </div>
+</div>

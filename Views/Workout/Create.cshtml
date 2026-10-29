@@ -1,0 +1,170 @@
+﻿@model FitWiseBD.Models.Workout
+
+@{
+    ViewData["Title"] = "Add Workout";
+}
+
+<div class="container mt-5">
+
+    <div class="card shadow-sm border-0 p-4">
+
+        <h2>🏃 Add New Workout</h2>
+
+        <p class="text-muted">
+            Create a personal workout plan.
+        </p>
+
+        <hr />
+
+        <form asp-action="Create" method="post">
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger">
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Name"
+                       class="form-label">
+                    Workout Name
+                </label>
+
+                <input asp-for="Name"
+                       class="form-control"
+                       placeholder="e.g. Push Ups" />
+
+                <span asp-validation-for="Name"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <div class="mb-3">
+
+                <label asp-for="Type"
+                       class="form-label">
+                    Workout Type
+                </label>
+
+                <select asp-for="Type"
+                        class="form-select">
+
+                    <option value="Indoor">
+                        🏠 Indoor
+                    </option>
+
+                    <option value="Outdoor">
+                        🌳 Outdoor
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="mb-3">
+
+                <label asp-for="Difficulty"
+                       class="form-label">
+                    Difficulty
+                </label>
+
+                <select asp-for="Difficulty"
+                        class="form-select">
+
+                    <option value="">Select Difficulty</option>
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+
+                </select>
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+
+                    <label asp-for="Sets"
+                           class="form-label">
+                        Sets
+                    </label>
+
+                    <input asp-for="Sets"
+                           class="form-control"
+                           type="number"
+                           min="1" />
+
+                </div>
+
+                <div class="col-md-4 mb-3">
+
+                    <label asp-for="Reps"
+                           class="form-label">
+                        Reps
+                    </label>
+
+                    <input asp-for="Reps"
+                           class="form-control"
+                           type="number"
+                           min="1" />
+
+                </div>
+
+                <div class="col-md-4 mb-3">
+
+                    <label asp-for="DurationMinutes"
+                           class="form-label">
+                        Duration (minutes)
+                    </label>
+
+                    <input asp-for="DurationMinutes"
+                           class="form-control"
+                           type="number"
+                           min="1" />
+
+                </div>
+
+            </div>
+
+            <div class="mb-3">
+
+                <label asp-for="CaloriesBurned"
+                       class="form-label">
+                    Calories Burned
+                </label>
+
+                <input asp-for="CaloriesBurned"
+                       class="form-control"
+                       type="number"
+                       min="0" />
+
+            </div>
+
+            <div class="mb-3">
+
+                <label asp-for="Description"
+                       class="form-label">
+                    Description
+                </label>
+
+                <textarea asp-for="Description"
+                          class="form-control"
+                          rows="4"
+                          placeholder="Describe this workout...">
+                </textarea>
+
+            </div>
+
+            <button type="submit"
+                    class="btn btn-dark">
+                Create Workout
+            </button>
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary">
+                Cancel
+            </a>
+
+        </form>
+
+    </div>
+
+</div>
